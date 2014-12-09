@@ -35,7 +35,13 @@ from the Octave control toolbox can be applied just like that. This
 reaches from simple transfer function plotting to stability analyses and
 system response computation on arbitrary system input.
 
-Please refer to figure \ref{figFirstIntroExample} as an example
+<wiki:comment>
+Figure URLs just like that to show the picture doesn't work. Using the image in a link from the text at least enables the user to get the imgae on mouse click. Ugly work around.
+</wiki:comment>
+
+http://code.google.com/p/linnet/source/browse/wiki/trunk/frontPage/FirstIntroExample.png
+
+Please refer to figure [http://code.google.com/p/linnet/source/browse/wiki/trunk/frontPage/FirstIntroExample.png FirstIntroExample.png] as an example
 of how linNet works. This is a simple RLC element with a transfer
 function of second order. It can be represented by the following circuit
 netlist:
@@ -79,21 +85,11 @@ Supported linear devices:
 || Current controlled current source    || {{{I(I)}}} ||
 || Current probe (wire)                 || {{{PI}}}   ||
 
-
-<wiki:comment>
-\begin{figure}
-\centering
-\includegraphics[width=0.7\textwidth]{FirstIntroExample_OctaveOutput}
-\caption{Octave plot of transfer function of the system in figure
-\ref{figFirstIntroExample}}
-\label{figFirstIntroExample_OctaveOutput}
-\end{figure}
-</wiki:comment>
-http://code.google.com/p/linnet/source/browse/wiki/trunk/frontPage/FirstIntroExample.jpg
+http://code.google.com/p/linnet/source/browse/wiki/trunk/frontPage/FirstIntroExample_OctaveOutput.jpg
 
 Going to Octave and typing {{{G}}} to plot the transfer function (still
 using default device values) gives us figure
-\ref{figFirstIntroExample_OctaveOutput}. More plots or plots with altered
+[http://code.google.com/p/linnet/source/browse/wiki/trunk/frontPage/FirstIntroExample_OctaveOutput.jpg FirstIntroExample_OctaveOutput.jpg]. More plots or plots with altered
 device values are a matter of single commands in Octave.
 
 linNet means "linear network". It founds on a symbolic solver for
