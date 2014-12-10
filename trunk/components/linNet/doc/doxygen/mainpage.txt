@@ -1,0 +1,15 @@
+/*! @mainpage Software Documentation for linNet
+
+@section secIntro Introduction
+
+linNet - The Software for symbolic Analysis of linear Electronic Circuits
+
+This is not the manual. The only purpose of this documentation is to be a
+kind of code browser to support the software implementation. Get a quick
+overview on the files and contained functions and data types. Use it as a
+reference book while working on the software.
+
+For everything else, please refer to the <a
+href="file:../../userGuide/linNet-userGuide.pdf" target="_blank">manual</a>.
+
+*/

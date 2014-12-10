@@ -1,0 +1,97 @@
+\chapter{Formal Syntax Description of Input File}
+\label{secBNFOfCnl}
+
+The syntax of the the circuit defining input file (the netlist or
+\file{*.cnl} file) in Backus-Naur form:
+
+\begin{small}
+\begin{verbatim}
+<circuit>       = {[<deviceDef> | <voltageDef> | <resultDef> | <bodeResultDef>] (EOL|';')}
+<deviceDef>     = <deviceType> <name> <node> <node> [<node> | <control>] [<relation>]
+<deviceType>    = 'R'|'Y'|'C'|'L'|'PI'|'U'[<controlledBy>]|'I'[<controlledBy>]|'OP'
+<controlledBy>  = '(' ('U'|'I') ')'
+<control>       = <node> <node> | <name>
+<relation>      = <name> '=' <quantityRef>
+<quantityRef>   = <number> | <deviceRef>
+<deviceRef>     = [<rationalNum> '*'] <deviceName>
+<voltageDef>    = 'DEF' <name> <node> <node>
+<resultDef>     = 'RES' <name> <unknown> {<unknown>} [<plotInfo>]
+<bodeResultDef> = 'PLOT' <name> <unknown> <known> [<plotInfo>]
+<node>          = <identifier>
+<known>         = <name>
+<unknown>       = <name>
+<name>          = <identifier>
+<plotInfo>      = ('LIN' | 'LOG') <integer> <number> <number>
+<identifier>    = <character> {<character> | <digit>}
+<character>     = 'a' | ... | 'z' | 'A' | ... | 'Z' | '_'
+<number>        = <integer> ['.' [<integer>]] [<exponent>]
+<rationalNum>   = ['('] <integer> '/' <integer> [')']
+<integer>       = <digit> {<digit>}
+<exponent>      = ('y' | 'z' | 'a' | 'f' | 'p' | 'n' | 'u' | 'm' | 'c' | 'd'
+                   | 'D' | 'h' | 'k' | 'M' | 'G' | 'T' | 'P' | 'X' | 'Z' | 'Y'
+                  )
+                  | ('E' ['+'|'-'] <integer>)
+<digit>         = '0' | ... | '9'
+\end{verbatim}
+\end{small}
+
+Remarks:
+
+Whitespace separates syntax elements and has not been integrated into
+the syntax graph. Blanks and tabs are permitted.
+
+Comments are defined as in C/C++ and are not shown in the syntax graph.
+
+Forward references are generally not supported. This is why result
+definitions should appear at the end of the file; they typically refer to
+nodes, which need to be already defined. An exception are node references
+made in the control inputs of voltage controlled sources; the referenced
+nodes may be defined later by being connected to actual devices.
+
+\code{<deviceDef>}: The number of nodes depends:
+\begin{itemize}
+  \item Most devices have two connectors. They specify two nodes (2 times
+    \code{<node>}), which they are connected to
+  \item The case having 3 times \code{<node>} is for operational
+    amplifiers only
+  \item The case having 4 times \code{<node>} is for the voltage
+    controlled sources. The first two nodes indicate where the source is
+    connected and the second pair (\code{<control>}) defines the
+    controlling voltage potential difference
+  \item The case having 2 times \code{<node>} followed by a device name
+    (\code{<control>}) is for the current controlled sources. The device
+    name references an already defined current probe element (type
+    \code{PI}). The current through this element is the control current of
+    the source
+\end{itemize}
+
+\code{<deviceRef>}: \code{<rationalNum>} is a quotient of two positive
+integer numbers in the range $[1..999]$. For clarity, the quotient may be
+enclosed in parenthesis.
+
+Devices of type \code{U}, \code{I}, \code{OP} and \code{PI} can't have a
+value and thus don't have a \code{<relation>}.
+
+
+Explanation of the specification of the desired computation results:
+
+\code{<voltageDef>}: Definition of any voltage in the network as potential
+difference between two nodes. The voltage gets a name.
+
+\code{<resultDef>}: Definition of a full result. Such a result means the
+formula how a number of unknowns is composed from all knowns. Named
+voltages according to \code{<voltageDef>} and/or any unknown introduced
+and named by the LES creator can be referenced. The generated Octave
+script code will contain a LTI MIMO transfer function object, which
+describes the full set of dependencies between knowns and unknowns.
+
+\code{<bodeResultDef>}: Definition of a frequency response plot. This plot
+is limited to the dependency of one quantity on one other one. The result
+is implemented as an LTI SISO transfer function object in the generated
+Octave script.
+
+\code{<plotInfo>}: The first number is the number of plotted points, in
+total for linear frequency axes or per decade for logarithmic axes. The
+following pair of numbers is the frequency range.
+
+

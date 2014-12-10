@@ -1,0 +1,19 @@
+U Uin K1 gnd
+DEF U2 Kplus gnd // We don't want to silently permitt user voltages
+                 // defined across unconnected sub-networks although it
+                 // seems to be defined here due to the quite explicit
+                 // definition of two ground nodes. Add an error message
+                 //   If wed replace gnd by e.g. g_nd and let the system
+                 // select the ground nodes arbitrarily then we get a
+                 // entirely confusing result without any warning.
+                 // (Knowing the ground nodes it's however still correct.)
+DEF U3 gnd gnd2
+DEF U4 gnd gnd
+DEF U5 gnd2 gnd2
+DEF U6 Kplus Kplus
+
+//R Rin K1 gnd
+
+U(U) k Kplus Kminus K1 gnd
+R Rgnd Kminus gnd2
+R Rout Kplus gnd2

@@ -1,0 +1,9 @@
+/* Test of fault handling: Prove that connecting two ends of a controlled
+   voltage source to the same node leads to linear contradictory
+   equations. */
+U       Uin n1  gnd
+R       R1  n1  n2
+R       R2  n2  gnd
+
+U       U2  n3  gnd
+U(U)    kU  n1  n1  n3  gnd

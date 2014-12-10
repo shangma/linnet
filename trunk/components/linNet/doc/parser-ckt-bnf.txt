@@ -1,0 +1,58 @@
+(* The syntax of the netlist input file (*.ckt) as Backus-Naur-Form. *)
+
+<circuit>           = {{' '} [<deviceDef> | <plotInfo> | <comment>] {' '} ('\r'|'\n'|';')}
+<comment>           = '*' {<charAlnum>}
+<deviceDef>         = <deviceDesignation> <space> <node> <space> <node>
+                      [ (<space> <node>)                                            (* 1) *)
+                        | (<space> <node> <space> <node> [<space> <quantityRef>])   (* 2) *)
+                        | (<space> <relation>)                                      (* 3) *)
+                      ]
+<deviceDesignation> = <deviceName> | 'U1' | 'U2' | 'OP'                             (* 4) *)
+<deviceName>        = ('R'|'C'|'L'|'G'|'S'|'Y') {<charAlnum>}
+<node>              = <charAlnum> {<charAlnum>}
+<relation>          = ('R'|'C'|'L'|'Y') '=' <quantityRef>
+<quantityRef>       = <number> | <deviceRef>
+<deviceRef>         = [<integer> '*'] <deviceName>
+<plotInfo>          = '.AC' <space> ('DEC' | 'LIN') <space> <integer> <space> <number>
+                      <space> <number>
+<space>             = ' ' {' '}
+<charAlnum>         = <charAlpha> | <digit>
+<charAlpha>         = 'a' | ... | 'z' | 'A' | ... | 'Z' | '_'
+<number>            = <integer> ['.' [<integer>]] [<exponent>]
+<exponent>          = ('p'|'n'|'u'|'m'|'K'|'M'|'G'|'T')|('E' ['+'|'-'] <integer>)
+<integer>           = <digit> {<digit>}
+<digit>             = '0' | ... | '9'
+
+(* End of syntax description *)
+
+Footnotes:
+ 1) This path describes the definition of an operational amplifier.
+ 2) This path is in use only to define a voltage controlled current
+    source.
+ 3) Usual case of passive device
+ 4) In case of a system in- or output definition (U1, U2) none of the
+    pathes 1)..3) must be used.
+
+Plot information (from SPICE):
+ .ac oct n f1 f2 means: n points per octave from frequency f1 to frequency
+    f2 and logarithmically distributed (not supported)
+ .ac dec n f1 f2 means: n points per decade from frequency f1 to frequency
+    f2 and logarithmically distributed
+ .ac lin n f1 f2 means: n points in total and linearly distributed between
+    f1 and f2
+
+Incompatibilities of new *.cnl parser with former *.ckt files:
+
+Nested comments are no longer supported: /* /* x */ */ used to be a valid
+comment but now it produces an error since the new parser recognizes only
+/* /* x */ as comment. It struggles with the remaining */.
+
+The number format, particularly the postfixes (necessarily) become case
+sensitive in order to avoid ambiguities like m for milli and M for Mega.
+Old files writing e.g. 5.6K produce a syntax error. The number need to be
+changed to 5.6k.
+
+Node names could begin with a digit. The new parser can tolerate node
+names which are integer numbers but it fails to recognize any other names
+that start with a digit. Node names 1 2 3 are still valid but 1outOf2
+would now produce a syntax error.

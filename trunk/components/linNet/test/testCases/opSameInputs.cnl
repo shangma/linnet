@@ -1,0 +1,6 @@
+/* Prove the correct fault handling if both the op-amp's inputs are connected together. */
+OP  OP      k   k   out
+U   Uin     in  gnd
+R   Rin     in  k
+R   Rback   out k
+R   Rout    out gnd

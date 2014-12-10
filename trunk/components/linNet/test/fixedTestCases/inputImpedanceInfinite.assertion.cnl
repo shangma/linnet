@@ -1,0 +1,4 @@
+OP OP in out out
+U Uin in gnd
+
+PLOT Z Uin I_Uin

@@ -1,0 +1,18 @@
+For Windows only:
+
+// http://msdn.microsoft.com/en-us/library/windows/desktop/ms683197.aspx
+
+#include "windows.h"
+
+char fileName[256];
+DWORD res = GetModuleFileName( /* HMODULE hModule */ NULL
+                             , /* LPTSTR */ fileName
+                             , /* DWORD nSize */ sizeof(fileName)
+                             );
+printf("GetModuleFileName: %d, %s\n", res, fileName);
+if(res == sizeof(fileName))
+    Path is truncated, re-run with larger buffer
+
+Caveat: Including windows.h requires type boolean to become unsigned char.
+This introduces a fundamental (not necessarily harmful) change of the
+software.

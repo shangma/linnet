@@ -1,0 +1,39 @@
+/**
+ * @file recursiveControlledVoltageSrcs.cnl
+ *   Test case for linNet.
+ * This test case proves the correct behavior of two recursively related
+ * voltage controlled voltage sources.
+ *   Manually figured out results are:
+ * U_N3 = k2/(1+k1*k2) * U_in
+ * I_k1 = [(k1-1)*k2*R1 - R2]/[R1*R2*(1 + k1*k2)] * U_in
+ * I_k2 = (1-k1)*k2/[(1+k1*k2)*R2] * U_in
+ *   These results need to be reproduced by linNet.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U    Uin N1 GND
+R    R1  N1 N2
+R    R2  N2 N3
+
+/* The first voltage controlled voltage source has the output voltage of
+   the second one as control voltage. */
+U(U) k1  N2 GND N3 GND
+
+/* The second voltage controlled voltage source has the voltage drop at
+   the input resistor as control voltage. */
+U(U) k2  N3 GND N1 N2  k2 = (2/3)*k1
+

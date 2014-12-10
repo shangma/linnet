@@ -1,0 +1,8 @@
+U U0 K1 gnd
+U U1 K1 K2
+
+PI I_U1 K2 gnd /* Here we get "ERROR - The name I_U1 is ambiguous. It is
+                  already in use for a device" as feedback. This is
+                  probably hard to understand. */
+
+R Rl K1 gnd

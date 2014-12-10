@@ -1,0 +1,5 @@
+U Uin in  gnd
+L L   in  K1
+C C   K1  out
+R R   out gnd
+PLOT G U_out U_in

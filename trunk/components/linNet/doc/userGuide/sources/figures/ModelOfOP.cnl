@@ -1,0 +1,6 @@
+U    Uin  in    gnd
+R    Rin  in    gnd
+/* k has the meaning of R1/R2 in
+   the inverting OP circuit */
+U(U) k    out   gnd  gnd in 
+PLOT G    U_out U_in

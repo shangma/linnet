@@ -1,0 +1,24 @@
+/* LP with "normal" ground */
+U    Uin1  in1    gnd1
+     
+OP   OP1   opInv1 gnd1   opOut1
+R    Rin1  in1    opInv1
+R    Rfb1  k1     opOut1
+C    C1    opInv1 k1
+     
+DEF  Uout1 opOut1 gnd1
+PLOT G1    Uout1  Uin1
+PLOT Z1    Uin1   I_Uin1  
+
+/* Same LP with other ground */
+U    Uin2  gnd2   null2
+     
+OP   OP2   opInv2 null2  opOut2
+R    Rin2  gnd2   opInv2
+R    Rfb2  k2     opOut2
+C    C2    opInv2 k2
+     
+DEF  Uout2 opOut2 null2
+PLOT G2    Uout2  Uin2
+PLOT Z2    Uin2   I_Uin2  
+

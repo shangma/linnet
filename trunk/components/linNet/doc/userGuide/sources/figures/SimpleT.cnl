@@ -1,0 +1,7 @@
+U    Uin  in  gnd
+R    Rb   in  b
+PI   I_b  b   gnd
+I(I) B    c   gnd I_b
+R    Rc   c   gnd
+DEF  Uout gnd c
+PLOT G Uout U_in

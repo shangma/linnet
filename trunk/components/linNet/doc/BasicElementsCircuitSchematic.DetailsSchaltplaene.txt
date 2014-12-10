@@ -1,0 +1,28 @@
+Ausgemessene Vorlage (Eagle, *.sch):
+L: 10.85 x 3.15 = 31:9
+R:  8.1  x 3.15 = 18:7, Rand: 0.4
+Leitung: 0.2
+Knoten: 1.55
+C: 0.8 x 6.2 = 4:31, zwei Stück mit Abstand 0.75
+
+1. Iteration:
+
+3.15 ~= 0.5*6.2
+4:31 ~= 1:8
+0.75 ~= 0.8
+31:9 ~= 3.5
+18:7 ~= 2.6
+
+führt zu:
+C: 1mm hoch, 8 mm breit, 8 mm Abstand
+L: 4mm breit, 14mm lang
+R: 4mm breit, 10.5 mm lang (2.Iteration: statt 10.4), Rand 0.5mm
+Leitung: 0.25 mm
+Knoten: 2 mm
+Abrundungen: R: 0.25mm, Leitung: 0.25 mm
+
+Konventionen:
+Spannungspfeile enden in 0.5 mm Abstand von den gemeinten Knoten
+Indizierte Bezeichnungen: statt Tieferstellen (wie geht das?) wird eine um
+einen Schritt kleinere Schriftgroesse verwendet (einmal auf A mit Dreieck
+nach unten klicken)

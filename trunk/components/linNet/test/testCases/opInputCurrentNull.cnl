@@ -1,0 +1,13 @@
+/* Prove behavior of current probe for null input current of OP.
+     I_in1/2 and I_out should be null and I_load should be same as I_OP. */
+U   Uin     in  gnd
+R   Rin     in  k
+OP  OP      op1 op2 op3
+R   Rback   out k
+
+PI  I_in1   k   op1
+PI  I_in2   gnd op2
+PI  I_load  op3 out
+PI  I_out   out open
+
+RES IOfInterest I_in1 I_in2 I_out I_load I_OP

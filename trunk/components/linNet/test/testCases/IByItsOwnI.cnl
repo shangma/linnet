@@ -1,0 +1,9 @@
+/* Test case (to be extended): A current source is controlled by its own
+   current; we thus have I = k*I or I=0. In this simple circuit this is
+   correctly handled by linNet. */
+U       Uin     in  gnd
+
+PI      I_ctrl  in  n1
+R       Rin     n1  n2
+
+I(I)    k       n2  gnd I_ctrl

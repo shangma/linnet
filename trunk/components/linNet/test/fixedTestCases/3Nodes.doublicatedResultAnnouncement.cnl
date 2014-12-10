@@ -1,0 +1,28 @@
+/*
+ * Test: Three nodes and a branch in between all nodes to get a maximally
+ * complex structure of the LES
+ *
+ * Copyright (C) 2013 Peter Vranken
+ */
+
+// The circuit is handled correct but in the generated output (log file)
+// there the doublicated announcement of the result ("User-defined result msResult"):
+//   Aug 27 10:58:35 2014 - 000031 ms - RESULT - User-defined result msResult:
+//   User-defined result msResult:
+//   The solution for unknown Uout:
+
+U U1  K3  K1
+U U2  K2  gnd
+
+
+R R3  \
+  K3  \
+  K2
+R R2  K2  K1
+R R6  K2  gnd
+R R1  K1  gnd
+R R5  K3  K1
+R R4  K3  gnd
+
+DEF   Uout K1 K2
+RES   msResult Uout LIN 30 10. 10M

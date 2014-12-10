@@ -1,0 +1,13 @@
+U Uin K1 gnd
+DEF Uout K2 gnd
+
+PLOT G   Uout Uin
+PLOT Zin Uin I_Uin
+
+I Iload gnd K2
+PLOT Zout Uout Iload
+
+C C  K1 K2
+R Rc K1 K2
+L L  K2 gnd
+R Rl K2 gnd

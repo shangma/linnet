@@ -1,0 +1,1977 @@
+\chapter{Math}
+
+\section{The elimination method}
+\label{secEliminationMethod}
+
+The basic principle of the linear equation system solver is the Gaussian
+elimination method. This algorithm replaces a row of coefficients of the
+LES with a linear combination of this row and a reference row such that
+the leading coefficient of the row becomes a null. Doing this with two
+nested loops in an systematic way leads to a triangular matrix of
+coefficients, that still represents an equivalent LES and the solution of
+the last unknown is already figured out. (The others need additional,
+similar operations.) Normally, this algorithm is applied to numerals,
+which form an algebraic field. If so, the linear combination of the two
+rows is the sum of the reference row times a numeric factor and the row
+under progress. To compute this factor the division needs to be defined on
+the coefficients and this requires field characteristics.
+
+The symbolic solver operates on a simpler algebraic structure, a ring,
+which only knows sum and product but not the division; a prominent example
+of this structure are integer numbers.
+
+If we want to apply the Gaussian method to coefficients of a ring than we
+have to use another linear combination: Both combined rows are multiplied
+crosswise with the leading coefficient of the other row and these two
+products are then subtracted. Replacing the row under operation with this
+linear combination still fulfills the requirement of shaping null values
+in a controlled way and we indeed end up with a triangular matrix and a
+solution for the last unknown (and could proceed to figure out the others
+as in the standard case).
+
+The problem we face is of purely practical nature: The absolute value of
+the coefficients increases in strong exponential order; for our class of
+coefficients this would mean an exploding increase of both memory and
+computation time. The proposed way out is a known divisor $d$; given $a$
+is the coefficient resulting from the previously explained linear
+combination then it holds $a = d \tilde a$, where $d$ and $\tilde a$ are
+existing instances of the class of coefficients. Since $d$ is identical
+for all coefficients of a row we can modify the elimination rule: We
+don't replace the row under progress with the results $a$ of the linear
+combination so far but with the~$\tilde a$.
+
+The known divisor $d$ is easily computed: it can be found as the last
+recently computed coefficient on the diagonal of the matrix and it is one
+in the very first iteration.
+
+Some proves are given in this appendix: The main prove confirms the
+existance of the factorization $a = d \tilde a$ with the proposed $d$,
+which is followed by the proves of particular characteristics of the
+coefficients in the given (physical) context, characteristics that
+strongly determine the chosen implementation. Finally the correctness and
+finiteness of the algorithm that implements the factorization is proven --
+either is not apparent from the source code.
+
+Prior to the proves we give an example of the proposed elimination method.
+
+
+\subsection{Example: Elimination with integer numbers}
+\label{secExampleElimMethod}
+
+% Here's some Octave code to prove the presented equations:
+% format rat
+% LES=[
+% -7 ,  3 ,  5 ,  7  , -6  ,  1
+%  1 ,  0 , -2 , -5  ,  3  ,  0
+%  0 ,  2 ,  0 , -1  ,  13 ,  0
+% -3 ,  3 , -7 , -11 ,  8  , -2
+% -1 , -2 ,  5 , -3  ,  7  ,  0]
+% M = LES(:,1:end-1)
+% Y = LES(:,end)
+% X=M\Y
+% M_Y=LES(:,[1:end-2 end])
+% det(M)
+% det(M_Y)
+%
+% Other example, which leads to non cancelled result (can still be cancelled by 9):
+% format rat
+% LES=[
+% -7 ,  3 ,  5 ,  7  , -6  ,  1
+%  1 ,  0 , -2 , -5  ,  3  ,  0
+%  0 ,  2 ,  0 , -1  ,  13 ,  0
+% -4 ,  3 , -7 , -11 ,  8  , -2
+% -1 , -2 ,  5 , -3  ,  7  ,  0]
+% M = LES(:,1:end-1)
+% Y = LES(:,end)
+% X=M\Y
+% M_Y=LES(:,[1:end-2 end])
+% det(M)
+% det(M_Y)
+
+Be the following LES given:
+
+\begin{equation}
+\label{eqSampleLES}
+\left(
+\begin{array}{ccccc|c}
+$-7$ &  $3$ &  $5$ &  $7$  & $-6$  &  $1$ \\
+ $1$ &  $0$ & $-2$ & $-5$  &  $3$  &  $0$ \\
+ $0$ &  $2$ &  $0$ & $-1$  &  $13$ &  $0$ \\
+$-3$ &  $3$ & $-7$ & $-11$ &  $8$  & $-2$ \\
+$-1$ & $-2$ &  $5$ & $-3$  &  $7$  &  $0$
+\end{array}
+\right)
+\end{equation}
+
+\noindent
+1st Elimination step, the reference row is the first one, it is combined
+with rows 2\ldots5 and the known divisor is $d=1$. The reference row
+itself is not touched. This yields:
+
+\begin{displaymath}
+\left(
+\begin{array}{ccccc|c}
+$-7$ &   $3$ &   $5$ &   $7$ &  $-6$ &   $1$ \\
+ $0$ &  $-3$ &   $9$ &  $28$ & $-15$ &  $-1$ \\
+ $0$ &   $0$ & $126$ & $371$ &  $63$ & $-14$ \\
+ $0$ & $-12$ &  $64$ &  $98$ & $-74$ &  $17$ \\
+ $0$ &  $17$ & $-30$ &  $28$ & $-55$ &   $1$
+\end{array}
+\right)
+\end{displaymath}
+
+\noindent
+2nd elimination step, the reference row is the second one, it is combined
+with rows 3\ldots5. The known divisor is the diagonal coefficient of the
+1st elimination step, $d=-7$. This yields:
+
+\begin{displaymath}
+\left(
+\begin{array}{ccccc|c}
+$-7$ &  $3$ &   $5$    &    $7$    &  $-6$    &   $1$    \\
+ $0$ & $-3$ &   $9$    &   $28$    & $-15$    &  $-1$    \\
+ $0$ &  $0$ & $126/-7$ &  $371/-7$ &  $63/-7$ & $-14/-7$ \\
+ $0$ &  $0$ & $-84/-7$ &   $42/-7$ &  $42/-7$ & $-63/-7$ \\
+ $0$ &  $0$ & $-63/-7$ & $-560/-7$ & $420/-7$ &  $14/-7$
+\end{array}
+\right) =
+\end{displaymath}
+
+\begin{displaymath}
+\left(
+\begin{array}{ccccc|c}
+$-7$ &  $3$ &   $5$ &   $7$ &  $-6$ &  $1$ \\
+ $0$ & $-3$ &   $9$ &  $28$ & $-15$ & $-1$ \\
+ $0$ &  $0$ & $-18$ & $-53$ &  $-9$ &  $2$ \\
+ $0$ &  $0$ &  $12$ &  $-6$ &  $-6$ &  $9$ \\
+ $0$ &  $0$ &   $9$ &  $80$ & $-60$ & $-2$
+\end{array}
+\right) \\
+\end{displaymath}
+
+\noindent
+3rd elimination step, the reference row is the third one, it is combined
+with rows 4 and 5. The known divisor is the diagonal coefficient of the
+second elimination step, $d=-3$. This yields:
+
+\begin{displaymath}
+\left(
+\begin{array}{ccccc|c}
+$-7$ &  $3$ &   $5$ &    $7$    &   $-6$    &    $1$    \\
+ $0$ & $-3$ &   $9$ &   $28$    &  $-15$    &   $-1$    \\
+ $0$ &  $0$ & $-18$ &  $-53$    &   $-9$    &    $2$    \\
+ $0$ &  $0$ &   $0$ &  $744/-3$ &  $216/-3$ & $-186/-3$ \\
+ $0$ &  $0$ &   $0$ & $-963/-3$ & $1161/-3$ &   $18/-3$
+\end{array}
+\right) =
+\end{displaymath}
+
+\begin{displaymath}
+\left(
+\begin{array}{ccccc|c}
+$-7$ &  $3$ &   $5$ &    $7$ &   $-6$ &  $1$ \\
+ $0$ & $-3$ &   $9$ &   $28$ &  $-15$ & $-1$ \\
+ $0$ &  $0$ & $-18$ &  $-53$ &   $-9$ &  $2$ \\
+ $0$ &  $0$ &   $0$ & $-248$ &  $-72$ & $62$ \\
+ $0$ &  $0$ &   $0$ &  $321$ & $-387$ & $-6$
+\end{array}
+\right) \\
+\end{displaymath}
+
+\noindent
+Last elimination step, the reference row is the fourth one, it is combined
+with row 5. The known divisor is the diagonal coefficient of the
+third elimination step, $d=-18$. This yields:
+
+\begin{displaymath}
+\left(
+\begin{array}{ccccc|c}
+$-7$ &  $3$ &   $5$ &    $7$ &      $-6$            &       $1$           \\
+ $0$ & $-3$ &   $9$ &   $28$ &     $-15$            &      $-1$           \\
+ $0$ &  $0$ & $-18$ &  $-53$ &      $-9$            &       $2$           \\
+ $0$ &  $0$ &   $0$ & $-248$ &     $-72$            &      $62$           \\
+ $0$ &  $0$ &   $0$ &    $0$ & $119088/-18=-6616$ & $-18414/-18=1023$
+\end{array}
+\right)
+\end{displaymath}
+
+\noindent
+The solution for the last unknown is $1023/-6616$. The coefficients of the
+last row of the last elimination step designate the determinants of the
+LES (i.e. the main determinant and the one related to the unknown
+according to Cramer's rule):
+
+\begin{displaymath}
+\left|
+\begin{array}{ccccc}
+$-7$ &  $3$ &  $5$ &  $7$  & $-6$  \\
+ $1$ &  $0$ & $-2$ & $-5$  &  $3$  \\
+ $0$ &  $2$ &  $0$ & $-1$  &  $13$ \\
+$-3$ &  $3$ & $-7$ & $-11$ &  $8$  \\
+$-1$ & $-2$ &  $5$ & $-3$  &  $7$
+\end{array}
+\right| = -6616
+\end{displaymath}
+
+\begin{displaymath}
+\left|
+\begin{array}{ccccc}
+$-7$ &  $3$ &  $5$ &  $7$  &  $1$ \\
+ $1$ &  $0$ & $-2$ & $-5$  &  $0$ \\
+ $0$ &  $2$ &  $0$ & $-1$  &  $0$ \\
+$-3$ &  $3$ & $-7$ & $-11$ & $-2$ \\
+$-1$ & $-2$ &  $5$ & $-3$  &  $0$
+\end{array}
+\right| = 1023
+\end{displaymath}
+
+
+\subsection{Prove of statement about known divisor}
+
+The prove of the statement that we can find a common divisor in each
+elimination step as the diagonal coefficient of the previous elimination
+step is based on some algebraic transformations, which will show that
+after the elimination step each coefficient has the meaning of the
+determinant of a sub-matrix of the LES. Due to the Laplace expansion of a
+determinant, which computes the determinant only with products and sums,
+this must be an existing element of the class of coefficients.
+
+% @{}: Discard indentation of before and/or behind columns
+\medskip
+\noindent
+\begin{tabular}{p{0.91\textwidth}r}
+Definition: Be $M^{[k]}_{m n}$ the sub-matrix of $M$, which
+has the dimension $k \times k$ and the coefficients $a_{ij}$ of $M$ at
+$i=1..k-1,m$ and $j=1..k-1,n$ with $m, n \geq k$.
+& \eqnum \label{eqDefSubMatrix} \\
+\end{tabular}
+\smallskip
+
+\noindent
+$M^{[k]}_{m n}$ is a square matrix. It inherits the upper-left
+square of $M$ and has one additional row that has the
+coefficients of row $m$ of $ M$ and one additional column that
+has the coefficients of row $n$ of $M$.
+
+Examples: If $M$ is the matrix (\ref{eqSampleLES}) from the example
+in section \ref{secExampleElimMethod} then we have $M^{[1]}_{1 4}=7$,
+\begin{displaymath}
+M^{[2]}_{2 3} =
+\left(
+\begin{array}{cc}
+-7 &   5 \\
+ 1 &  -2
+\end{array}
+\right)
+\end{displaymath}
+or
+\begin{displaymath}
+M^{[4]}_{4 6} =
+\left(
+\begin{array}{cccc}
+-7 &  3 &  5 &  1 \\
+ 1 &  0 & -2 &  0 \\
+ 0 &  2 &  0 &  0 \\
+-3 &  3 & -7 & -2
+\end{array}
+\right)
+\end{displaymath}
+
+% @{}: Discard indentation of before and/or behind columns
+\medskip
+\noindent
+\begin{tabular}{p{0.91\textwidth}r}
+Lemma: Be $M$ the representation of a LES of dimension $p \times q$ with
+$q \geq p$ and $M^{(k)}$ with $k=1 \ldots p-1$ the result of elimination
+step $k$ of the proposed elimination method and $a^{(k)}_{m n}$ the
+coefficient of $M^{(k)}$ at position $mn$. It holds:
+\begin{equation*}
+a^{(k)}_{m n} = \left|M^{[k+1]}_{m n}\right| \qquad \text{with } m,n > k
+\end{equation*}
+& \eqnum \label{eqLemmaCoefIsDet} \\
+\end{tabular}
+\smallskip
+
+\noindent
+Lemma (\ref{eqLemmaCoefIsDet}) is what we still have to prove: If we know
+that the resulting coefficients are determinants of sub-matrices of the
+original, the LES describing matrix $M$ then it must be existing
+valid instances from the class of coefficients and the factorization was
+possible. 
+
+The prove of lemma (\ref{eqLemmaCoefIsDet}) is given for a particular
+coefficient $a_{ij}$ of the LES. We have to consider the position of the
+coefficient in the matrix and and the elimination step. The elimination
+step is denoted by the top index in parenthesis. The original LES is
+represented by matrix $M^{(0)}$. (Elimination step 0 means prior to the
+first elimination step. $M^{(0)}$ is also simply written as $M$ -- the
+explicit indication of elimination step 0 is mostly omitted.) The lemma
+relates the coefficient $a^{(k)}_{ij}$ that is the result of elimination
+step $k$ with the determinant of a particular, square sub-matrix of
+$M^{(0)}$. The idea of the prove is to look at the coefficients of $M^{(0
+\ldots k)}$ at the positions that belong to this sub-matrix and to keep
+track what the operations of the eliminations steps mean to the value of
+the determinant of the sub-matrix. This leads to a chained equation, which
+finally proves the lemma. (Opposed to the relation of the $M^{(0 \ldots
+k)}$, which is an equivalence of LESs.) This looking at the coefficients
+of the sub-matrix means to reduce the prove for any elimination step of
+any rectangular matrix to the final elimination result of a square
+matrix.
+
+
+\subsection{Reducing the problem to square matrices}
+\label{secReduceToSqMat}
+
+It is essential that all the sub-matrices $M^{[1 \ldots n](0)}_{ij}$ in
+question are square and that they share the upper-left square area of $M$.
+All the factors of the linear combinations of rows to be computed are
+derived only from the coefficients found in this shared area and therefore
+the linear combinations made on the rows of the LES are always the same as
+one would have to use to perform the elimination of only the sub-matrix or
+of its determinant. This is now illustrated with an example:
+
+Be $M$ the matrix, which represents a LES with 5 unknowns and 2
+knowns:
+\begin{equation}
+M=\left(
+\begin{array}{ccccc:cc}
+a_{11} & a_{12} & a_{13} & a_{14} & a_{15} & a_{16} & a_{17} \\
+a_{21} & a_{22} & a_{23} & a_{24} & a_{25} & a_{26} & a_{27} \\
+a_{31} & a_{32} & a_{33} & a_{34} & a_{35} & a_{36} & a_{37} \\
+a_{41} & a_{42} & a_{43} & a_{44} & a_{45} & a_{46} & a_{47} \\
+a_{51} & a_{52} & a_{53} & a_{54} & a_{55} & a_{56} & a_{57} \\
+\end{array}
+\right)
+\end{equation}
+
+\noindent
+Let's take the coefficient at row 5, column 4: The lemma says
+
+\begin{equation*}
+a^{(1)}_{54} = \left| M^{[2]}_{54} \right| =
+\left|
+\begin{array}{cc}
+a_{11} & a_{14} \\
+a_{51} & a_{54}
+\end{array}
+\right|
+\end{equation*}
+
+\noindent
+When the first iteration of the elimination of the matrix $M$ reaches the
+last row it replaces:
+
+\begin{equation*}
+R^{(1)}_{5} = a_{11} R^{(0)}_{5} - a_{51} R^{(0)}_{1} \text{,}
+\end{equation*}
+
+\noindent
+which is -- for the affected four coefficients shared between $M$ and
+$M^{[2]}_{54}$ -- exactly the same operation as an elimination of
+$M^{[2]}_{54}$ would be:
+
+\begin{equation*}
+M^{[2](1)}_{54} =
+\left(
+\begin{array}{cc}
+a_{11} & a_{14} \\
+0      & a_{11} a_{54} - a_{51} a_{14}
+\end{array}
+\right)
+\end{equation*}
+
+\noindent
+All other operations of the first iteration of the
+elimination on $M$ affect rows and columns outside of $M^{[2]}_{54}$ and have no
+impact on any of the coefficients of $M^{[2](1)}_{54}$.
+
+Or let's take the coefficient at row 4, column 6: The lemma says
+
+\begin{equation*}
+a^{(2)}_{46} = \left| M^{[3]}_{46} \right| =
+\left|
+\begin{array}{ccc}
+a_{11} & a_{12} & a_{16} \\
+a_{21} & a_{22} & a_{26} \\
+a_{41} & a_{42} & a_{46}
+\end{array}
+\right|
+\end{equation*}
+
+\noindent
+(Please note, that this example refers to a coefficient,
+which has not the final value of the complete elimination, there will also
+be the value $a^{(3)}_{46}$ during further processing.)
+
+In the first elimination step and when the process reaches rows 2 and 4
+then shared coefficients are touched. The factors of the linear
+combination of rows ($(a_{11}, a_{21})$ and $(a_{11}, a_{41})$ for rows 2
+and 4, respectively) are located at according positions in $M$ and
+$M^{[3]}_{46}$ (i.e. in the first column) and thus the elimination of $M$
+is exactly the same operation as seen in its sub-matrix $M^{[3]}_{46}$.
+For both matrices the identical row replacements
+
+\begin{eqnarray*}
+R^{(1)}_{2} &=& a_{11} R^{(0)}_{2} - a_{21} R^{(0)}_{1} \\
+R^{(1)}_{4} &=& a_{11} R^{(0)}_{4} - a_{21} R^{(0)}_{4}
+\end{eqnarray*}
+
+\noindent
+take place (using the same global position indices in the matrix
+representations).
+
+If we look at the second elimination step it's just the same: the operation
+performed on the rows of matrix $M^{(1)}$ is
+
+\begin{equation*}
+R^{(2)}_{i} = a^{(1)}_{22} R^{(1)}_{i} - a^{(1)}_{i2} R^{(1)}_{2}
+\qquad \text{with } i=3 \ldots 5
+\end{equation*}
+
+\noindent
+Coefficients, which are shared with the sub-matrix are affected only for
+$i=4$ and then we see the same operation on the coefficients of the
+sub-matrix that would be used to run the second elimination step directly
+on the isolated sub-matrix. The required factors $(a^{(1)}_{22},
+a^{(1)}_{42})$ of the linear combination are found at the appropriate
+position in the sub-matrix.
+
+This idea holds in general for all sub-matrices in question because they
+all share their $k-1$ top-most rows and left-most columns with the
+original matrix $M$ and the factors of all the linear combinations are
+taken from these rows and columns - be it the original coefficients or the
+products of the $k-2$ involved, first elimination steps.
+
+This is why we can now reduce the prove to the elimination of the square
+sub-matrices. We have to show that the final value of the bottom-right
+coefficient in the square area is identical to the determinant of the
+original sub-matrix. This result for a particular but arbitrary
+coefficients can then be applied to any coefficient computed in any
+elimination step.
+
+But before we can start with the prove we need to introduce a minor lemma,
+which is applied in the following.
+
+
+\subsection{Linear combination of rows of determinant}
+
+For the following steps we need to understand how the value of the
+determinant of a square matrix is changed if a row of the matrix is
+replaced by the linear combination of itself and another row.
+
+% @{}: Discard indentation of before and/or behind columns
+\medskip
+\noindent
+\begin{tabular}{p{0.91\textwidth}r}
+Lemma: Be $M$ a square matrix and $\hat M$ the same matrix, where only row
+$R_j$ has been replaced with the linear combination $c_j R_j +
+c_i R_i$ of this row and the other row $R_i$. It holds: $|\hat M|=c_j
+|M|$.
+& \eqnum \label{eqLemmaLinCombRowsD} \\
+\end{tabular}
+\smallskip
+
+\noindent
+To prove lemma (\ref{eqLemmaLinCombRowsD}) we just need to expand $|\hat
+M|$ along its row $j$:
+
+% =
+%c_j \left|
+%\begin{array}{ccc}
+%a_{11} & \ldots & a_{1n} \\
+%\vdots & \ddots & \vdots \\
+%a_{n1} & \ldots & a_{nn}
+%\end{array}
+%\right| =
+%c_j \left| M \right|
+
+\begin{eqnarray}
+\left| \hat M \right| & = &
+\left|
+\begin{array}{ccc}
+a_{11}                  & \ldots & a_{1n} \\
+\vdots                  &        & \vdots \\
+a_{i1}                  & \ldots & a_{in} \\
+\vdots                  &        & \vdots \\
+c_j a_{j1} + c_i a_{i1} & \ldots & c_j a_{jn} + c_i a_{in} \\
+\vdots                  &        & \vdots \\
+a_{n1}                  & \ldots & a_{nn}
+\end{array}
+\right| \nonumber \\
+  & = & \sum^{n}_{c=1}(-1)^{i+c} (c_j a_{jc} + c_i a_{ic}) D_{jc}
+\qquad \text{with } D_{ij} \text{ being the sub-determinant at position } ij \nonumber \\
+  & = & c_j \sum^{n}_{c=1}(-1)^{i+c} a_{jc} D_{jc}
+        + c_i \sum^{n}_{c=1}(-1)^{i+c} a_{ic} D_{jc} \label{eqProveLemmaLinCombRowsD} \\
+  & = & c_j \left| M \right| + c_i \cdot 0 \nonumber
+\end{eqnarray}
+
+\noindent
+Both determinants in lemma (\ref{eqLemmaLinCombRowsD}), $|M|$ and $|\hat
+M|$, share all rows but row $j$, hence all sub-determinants $D_{jc}, c=1
+\ldots n$ are identical for both. Therefore the sum in the first addend in
+(\ref{eqProveLemmaLinCombRowsD}) is the Laplace expansion of the
+determinant of $M$. The sum in the second addend in
+(\ref{eqProveLemmaLinCombRowsD}) is null; it is the Laplace expansion of a
+similar determinant: all rows but $j$ are identical but row $j$ is
+replaced by row $i$. The determinant of a matrix with two identical thus
+linear dependent rows is null. Equation (\ref{eqProveLemmaLinCombRowsD})
+reduces to lemma (\ref{eqLemmaLinCombRowsD}).
+
+% Determinant with identical rows is null: Swap two rows: Expansion
+% according to sum of all permutated tupels proves that the sign of the
+% determinant is inverted. If these rows are identical then the
+% determinant has not changed at all, so the value is unchanged. This can
+% only hold for the particular value null.
+
+
+\subsection{Prove for square sub-matrix}
+
+From now on we take the view at the sub-matrix only. To simplify the
+explanations we change the position indices of the coefficients. We are
+going to use consecutive one based indices as usual. The positional
+relationship with the matrix of the LES might be obscured but is out of
+scope in this section anyway.
+
+We investigate the elimination of an arbitrary square sub-matrix $S$
+according to definition (\ref{eqDefSubMatrix}) of $M$, the matrix describing
+the original LES:
+
+\begin{eqnarray*}
+S^{(0)} & = & M^{[n](0)}_{ij}\qquad \text{with } n>1, i \geq n, j \geq n \\
+        & = &
+\left(
+\begin{array}{ccc}
+a_{11} & \ldots & a_{1n} \\
+\vdots & \ddots & \vdots \\
+a_{n1} & \ldots & a_{nn}
+\end{array}
+\right) \qquad \text{(here using the renamed position indices)}
+\end{eqnarray*}
+
+\noindent
+and define $D$ to be its determinant:
+
+\begin{eqnarray*}
+D & := & \left| S^{(0)} \right| \\
+  & =  &
+\left|
+\begin{array}{ccc}
+a_{11} & \ldots & a_{1n} \\
+\vdots & \ddots & \vdots \\
+a_{n1} & \ldots & a_{nn}
+\end{array}
+\right|
+\end{eqnarray*}
+
+\noindent
+Please note that due to the redefinition of the position indices $a_{ij}$
+no longer is the coefficient of $M$ in row $i$ and column $j$ if either
+$i=n$ or $j=n$.
+
+After the first elimination step of the LES -- and according to section
+\ref{secReduceToSqMat} the first elimination step of $S$ -- the matrix and
+its determinant change as follows:
+
+\begin{eqnarray}
+S^{(1)} & = &
+\left(
+\begin{array}{cccc}
+a_{11} & \ldots       &           & a_{1n}       \\
+0      & a^{(1)}_{22} & \ldots    & a^{(1)}_{2n} \\
+\vdots & \vdots       & \ddots    & \vdots       \\
+0      & a^{(1)}_{n2} & \ldots & a^{(1)}_{nn}
+\end{array}
+\right) \nonumber \\
+D^{(1)} & := & \left| S^{(1)} \right|                                 \nonumber \\
+        & =  & \frac{\left(a_{11}\right)^{(n-1)}}{1^{(n-1)}} \left| S(0) \right| \nonumber \\
+        & =  & \frac{\left(a_{11}\right)^{(n-1)}}{1^{(n-1)}} D \label{eqSqrMatD1}
+\end{eqnarray}
+
+\noindent
+The factor in front of $D$ in equation (\ref{eqSqrMatD1}) is explained by
+the $n-1$ row operations that form the elimination step: The rows $2
+\ldots n$ are all multiplied by $a_{11}$ as part of the linear combination
+with the first row, which explains according to lemma
+(\ref{eqLemmaLinCombRowsD}) the numerator of the factor. Then the rows are
+all divided by the common divisor, which is one in the first elimination
+step. This explains the denominator of the factor.
+
+If we now present the second elimination step, too, then a general pattern
+becomes apparent, which gives us the wanted result for any size of matrix
+and its determinant:
+
+\begin{eqnarray}
+S^{(2)} & = &
+\left(
+\begin{array}{ccccc}
+a_{11} & \ldots       &              &        & a_{1n}       \\
+0      & a^{(1)}_{22} & \ldots       &        & a^{(1)}_{2n} \\
+0      & 0            & a^{(2)}_{33} & \ldots & a^{(2)}_{3n} \\
+\vdots & \vdots       & \vdots       & \ddots & \vdots       \\
+0      & 0            & a^{(2)}_{n3} & \ldots & a^{(2)}_{nn}
+\end{array}
+\right) \qquad \text{with }
+a^{(2)}_{ij} = \frac{a^{(1)}_{22} a^{(1)}_{ij} - a^{(1)}_{i2} a^{(1)}_{2j}}{a_{11}} \\
+\nonumber \\
+D^{(2)} & = & \frac{\left(a^{(1)}_{22}\right)^{(n-2)}}{(a_{11})^{(n-2)}} D^{(1)} \nonumber \\
+        & = & \frac{\left(a^{(1)}_{22}\right)^{(n-2)}}{(a_{11})^{(n-2)}}
+              \frac{\left(a_{11}\right)^{(n-1)}}{1^{(n-1)}} D                    \nonumber \\
+        & = & (a^{(1)}_{22})^{(n-2)} a_{11} D \label{eqSqrMatD2}
+\end{eqnarray}
+
+\noindent
+The pattern: In elimination step $k$ we multiply $n-k$ rows with the
+value $v = a^{(k-1)}_{kk}$, which temporarily and according to lemma
+(\ref{eqLemmaLinCombRowsD}) increases the determinant of the modified
+matrix by $v^{n-k}$ but in the next elimination step $k+1$, when $n-k-1$
+rows are processed the same value $v$ is used as common divisor, which
+decreases the determinant again by $v^{n-k-1}$ -- and a simple v to the
+power of one remains as additional factor in the equation between
+$D^{(k)}$ and $D$. This leads to the final elimination result, the result
+of elimination step $n-1$:
+
+\begin{eqnarray}
+S^{(n-1)} & = &
+\left(
+\begin{array}{ccccc}
+a_{11} & \ldots       &              &        & a_{1n}       \\
+0      & a^{(1)}_{22} & \ldots       &        & a^{(1)}_{2n} \\
+0      & 0            & a^{(2)}_{33} & \ldots & a^{(2)}_{3n} \\
+\vdots & \vdots       &              & \ddots & \vdots       \\
+0      & 0            & \hdots       &        & a^{(n-1)}_{nn}
+\end{array}
+\right) \nonumber \\
+D^{(n-1)} & = & \prod^{n-1}_{i=1} a^{(i-1)}_{ii} D \label{eqSqrMatDNm1}
+\end{eqnarray}
+
+\noindent
+$S^{(n-1)}$ is a triangular matrix. Its determinant is the product of all
+the diagonal elements. This product can be equated with
+(\ref{eqSqrMatDNm1}). Please note, that the expressions in parenthesis
+denote the elimination step not a power:
+
+\begin{equation*}
+\left| S^{(n-1)} \right| = \prod^{n}_{i=1} a^{(i-1)}_{ii}
+                         = D^{(n-1)}
+                         = \prod^{n-1}_{i=1} a^{(i-1)}_{ii} D
+\end{equation*}
+
+\noindent or
+
+\begin{equation}
+a^{(n-1)}_{nn} = D
+\end{equation}
+
+\noindent
+This is what we wanted to prove; the last diagonal element after the last
+elimination step has the value $D$ of the determinant of the original
+matrix $S$.
+
+The prove holds for all $n>1$ and any coefficient.\footnote{And for $n=1$
+by definition, too, if we consider the original matrix the result of the
+``0-th'' elimination step.} All coefficients at any position and after any
+elimination step of the matrix $M$, which represents the LES have the
+meaning of the determinant of the one or other sub-matrix of the
+\emph{original} matrix $M$.
+
+All the appearing determinants and thus all ever appearing coefficients
+can be represented as a sum of products of original coefficients. This
+defines the arithmetic class of the coefficients and their implementation
+with respect to storage and needed operations. To perform the elimination
+step we need to conduct the linear combination of a pair of coefficients
+(the linear combination of rows as used above is broken down to
+coefficients via an iteration along the rows), followed by the
+factorization with respect to the known divisor. Both together is called
+the ``elementary step'' in the implementation. The elementary step can be
+further broken down into the operations product, sum and factorization. A
+real division is not required.
+
+In the particular use case of \linnet{} the original coefficients are
+derived from physical facts that bear specific properties, which further
+refines the definition of their arithmetic class; this is explained in
+section \ref{secProveOfNonQuadraticCoef} and the following.
+
+
+\subsection{Pivoting}
+
+The linear combination used in an elimination step must never multiply the
+destination row with null; all the information of the related equation
+would be discarded and the final solution could not be figured out.
+Therefore, an implementation of the Gauss elimination method uses pivoting
+and so does \linnet{}'s extended method. If it holds $a^{(k-1)}_{kk} = 0$
+for the diagonal coefficient at the beginning of elimination step $k$ then
+the algorithm looks for a coefficient $a^{(k-1)}_{ck} \neq 0$ with $c >
+k$. If there is such a coefficient then the related row is swapped with
+row $k$. If there is no such coefficient then the elimination has
+completed with the result that there is no unambiguous solution for the
+unknowns of the LES. Because of the immediate abortion of the elimination
+the latter case has no impact on our proves. But even the former case is
+irrelevant because the instant row swapping ``in case'' is identical to
+the same (hypothetic) swapping of rows prior to the complete elimination
+process. ``Identical'' means that all chosen linear combinations, all
+common divisors and all resulting coefficients in all elimination
+steps would be just the same. And since the proves hold for any LES and
+matrix it also holds for the (hypothetic) LES and matrix with rows
+swapped prior to the elimination.
+
+
+\subsection{Computational effort}
+
+The order of complexity of the computation has not been investigated in
+depth. Obviously, as we use a modified Gauss elimination, it is $O(n^3)$
+in terms of elementary steps to bring the matrix in triangular shape.
+However, different to the Gauss elimination method there's no inverse
+elimination to bring it into diagonal form. The proposed method requires
+$n$-fold elimination for the $n$ unknowns, which means a complexity of
+$O(n^4)$ in terms of elementary steps for a full solution of the LES.
+
+In the \linnet{} use case the latter is irrelevant as the number of
+unknowns of interest, i.e. the really figured out unknowns, does typically
+not depend on the size of the circuit or the total number of unknowns; for
+this use case with a rather constant number of computed unknowns $O(n^3)$
+still holds.
+
+The bigger problem is the elementary step itself. It is the atomic operation, that
+combines a four-tuple of coefficients to a new coefficient. This operation
+is far from constant; the more the algorithm advances the longer the
+coefficients become and the longer this operation takes. Finally this
+operation yields the wanted result. In theory an upper boundary of this
+operation would be $O(n!)$; in a fully interconnected network, where each
+node is connected to each other node we will need to have $n!$ independent
+terms in the resulting expressions and these will need an according amount
+of time to be figured out. For practical relevant use cases full
+interconnectivity won't ever occur, sparse matrices are typical. Which makes
+it better but the order will still be far from good.
+
+A possible approach is the simplification that a network has a (more or
+less) constant number $c$ of interconnections (i.e. devices) between its
+nodes. If we furthermore disregard terms, which eliminate each other in
+the computed products of coefficients then the lengths of the coefficients
+were taken to the power of two in each elimination step and when using the
+unmodified Gauss elimination with linear combinations of rows. The
+length at the beginning is $c$. Repeatedly increasing this length leads to
+the complexity of $O(c^{(2^{n-1})})$.
+
+Due to the applied common divisor the proposed elimination method
+significantly reduces the growth in length of the coefficients. Across the
+eliminations steps $k=1 \ldots (n-1)$ the length will now grow like $c^2, c^3
+= \frac{(c^2)^2}{c}, c^4 = \frac{(c^3)^2}{c^2}, \ldots$ This leads to a
+complexity of still $O(c^n)$.
+
+% TODO Consider to try to do the sum: c^2*(n-1)^2 +
+% c^4*(n-2)^2 + c^8*(n-3)^2 etc. and c^2*(n-1)^2 + c^3*(n-2)^2 +
+% c^4*(n-3)^2 etc.
+Combining these considerations with the complexity of the elimination
+pattern, i.e. considering the quadraticly decreasing number of affected
+coefficients, could be tried to refine the result but the complexity of
+the elementary step will anyway be dominant.
+
+The improvement of the proposed factorization is illustrated by a numeric
+example. If we put $c=3$ and $n=8$ then $O(c^{(2^{n-1})})$ means about
+$10^{61}$ units of effort and $O(c^n)$ only about 6500 units, units
+however, which are significantly more expensive in terms of computational
+effort due to the factorization.
+
+The lengths of the coefficients and the computational effort for the
+elementary steps are closely related as linear lists are applied. The
+order of effort in terms of memory usage will be the same as for
+computational effort. The main impact on the computational effort is the
+growing length of the coefficients and the length of the coefficients is
+proportional to the memory consumption.
+
+Since the growth in length of the coefficients seems to have the
+overwhelming impact on memory and computational effort a possible
+optimization idea is an extended pivoting. Rather than looking for the
+first non null coefficient we could look for the row with the shortest
+coefficients. (If the longer rows are processed later than far less
+coefficients are affected.) However this kind of pivoting would in turn
+bring a significant additional complexity as it in turn depends on all
+(remaining) coefficients and their lengths. The next problem would be the
+definition of ``row with the shortest coefficients'': which norm to be
+applied; the average length is not necessarily the right choice.
+
+One has to see that the complexity of the duration of the computation is
+in line with the complexity of the eventually yielded result: Given you
+were very patient and would wait a number of years for the result
+then you'd probably be frustrated by this result. Kilometers of paper to
+print the formula and no practical use at all. As a matter of experience
+we can state that the analysis of circuits that have meaningful and still
+manageable transfer functions is uncritical with respect to computational
+effort.
+
+In this sense the theoretically poor order of the algorithm is harmless
+with respect to the imaginable practical use cases of the software.
+
+
+\subsection{Common divisors in final solution}
+
+The proposed elimination does not guarantee that the found solution (i.e.
+the found numerator and denominator for the right-most unknown) is free of
+common divisors. It can only guarantee that it won't introduce additional
+common divisors as the unmodified Gaussian elimination without the
+factorization would. If the method is e.g. applied to a matrix of
+integers, where all coefficients of a row or column have a common divisor
+then this common divisor will be propagated into the final result.
+
+% The statement must not be inverted: If all rows and columns are free of
+% common divisors then this doesn't guarantee that the result is free of
+% a common divisor; an according example exists for integer numbers (see
+% above in section "Example: Elimination with integer numbers"). This is
+% probably an integer effect, where sums can lead to new factors, e.g. the
+% two prime numbers 5 and 7 have the factorisable sum 12. For our
+% unrelated symbols this effect is not present: s+t is generally not
+% factorisable if s and t are atoms.
+
+In our application of the method the initial coefficients of the matrix
+describe independent and unrelated physical devices. The elimination
+method itself doesn't introduce common divisors, which means that the
+final result should always be fully canceled.
+
+For explanatory purpose it has to be mentioned that the relations between
+the values of devices of same kind, which can be stated in the netlist
+file are completely irrelevant to the elimination process of the LES.
+These relations are simply not known by the solver. They are applied only
+in the final rendering of the found solution and respecting the wanted
+absence of common divisors in the rendered result becomes a simple matter
+of traditional computation of the greatest common divisor of all affected
+numeric factors.
+
+
+\section{Prove of non quadratic coefficients}
+\label{secProveOfNonQuadraticCoef}
+
+The elimination method as pointed out in section
+\ref{secEliminationMethod} will work with any kind of objects of kind
+ring. The implementation of the solver will however strongly depend on the
+specific kind of object. The basic operations store, add and multiply and
+the factorization $a = d \tilde a$ need to be implemented. Our kind of
+objects, i.e. our kind of matrix coefficients, has some particular
+characteristics, which are strongly exploited in the implementation.
+
+Section \ref{secModellingDevices} on page \pageref{secModellingDevices}
+explains how the LES is set up. The modeling of the electronic devices
+determines how the coefficients of the LES look like (prior to the
+elimination). Summarizing this section we can state: At the beginning, all
+coefficients are sums of symbols and/or the number one. The addends of
+these sums may have both signs. No products of symbols appear and in
+particular no symbol is taken to a power other than one. No two
+addends of a coefficient are identical, so there's no possibility to
+agglomerate symbols leading to a product of a symbol and a number other
+than $\pm 1$.
+
+During the elimination steps the initial coefficients are multiplied and
+added and factorized. The resulting coefficients will still be sums. The
+addends will now either be products of different symbols and $\pm 1$ or
+the number $\pm 1$. The further characteristics of the initial
+coefficients (symbols taken to the power of one, no identical addends
+leading to products of symbols and a number other than $\pm 1$) are
+retained. The coefficients can thus be represented by a list of signed
+products of symbols. Each known symbol is either present in the product
+(power of one) or not (power of null). The product can be represented by a
+bit vector, where each bit is related to one known symbol. The sign of an
+addend could be represented by a Boolean, but actually isn't: The numeric
+factor in an addend is $\pm 1$ for a coefficient prior to and after each
+elimination step but can take (small) integer values in intermediate
+computation results. To avoid different representations of expressions
+during the computation and in the computation result we use integer
+numbers in general to represent the numeric factor.
+
+While the characteristics of the initial coefficients result from the
+modelling of the devices in the setup phase of the LES is the preservation
+of these characteristics during the elimination far from self-explanatory.
+This one and the next sections give the required proves. In the first step it
+is proven that the symbols in the products in the addends will never
+appear with a power other than one or null.
+
+% @{}: Discard indentation of before and/or behind columns
+\medskip
+\noindent
+\begin{tabular}{p{0.9\textwidth}r}
+Lemma: The value of the determinant of any of the sub-matrices of the LES
+according to definition (\ref{eqDefSubMatrix}) can be brought into the
+form of a sum of products of a numeric factor $f$ and all the device
+symbols taken to a power of either null or one. In this form no two
+addends of the sum have the same set of symbol powers.
+& \eqnum \label{eqLemmaNoQuadratic} \\
+\end{tabular}
+\smallskip
+
+\noindent
+Since all in the course of the elimination ever appearing coefficients
+have the value of one of these subdeterminants the same statement holds
+for all coefficients of the matrix after all the elimination steps.
+
+The device symbols are the given R, L, C, etc. They appear in the addends
+of the coefficients (power = 1) or they don't appear (power = 0) but --
+and this is the gist of the lemma -- they will never appear with a
+negative power or with a power of two or higher. To put it in an example:
+$R_1 R_2 C + R_1 L$ could be a coefficient but $R_1 R_1 C + R_1 L$ or
+$\frac{R_1}{R_2} C + R_1 L$ are expressions, which will definitely never
+appear as a coefficient of the matrix after an elimination step.
+
+The importance of the lemma is evident: The addends of the coefficients
+can be implemented as bit vectors and their products become cheap bit-wise
+integer operations.
+
+The prove of lemma (\ref{eqLemmaNoQuadratic}) exploits that there are
+symmetries of the symbols in the LES. Any symbol $s$ always appears in a
+characteristic pattern:
+\begin{equation}
+\label{eqMatrixPatternInS}
+\left(
+\begin{array}{ccccc}
+\ddots & & & & \\
+ & \pm s & \ldots & \mp s & \\
+ & \vdots & & \vdots & \\
+ & \mp s & \ldots & \pm s & \\
+ & & & & \ddots \\
+\end{array}
+\right)
+\end{equation}
+
+The explanation of the pattern is the meaning of symbol $s$: It designates
+the current flow through device $s$ from one node of the network to
+another one\footnote{In the internal representation of the network all
+devices have the meaning of conductance, i.e. the complex proportionality
+factor between current and voltage.}; and the current is the same at both
+ends. The sign of a current is defined from the node's perspective:
+Effluent is a negative current influent is positive by definition. A row
+of the LES is the current balance of a node, the columns are related to
+the unknown node's voltage potentials. An increase of the own potential
+will lead to an affluent current (thus negative sign), whereas an increase
+of the potential of the far end's node will lead to an influent current
+with positive sign. This leads to the pair $(+s, -s)$ in a row of the
+LES. The other row containing the inverse pair results accordingly from
+the current balance of the far end's node. Here the pair appears inverse
+as we take the perspective of the other node.
+
+Two exceptions have to be considered. We always have a ground node, which
+no current balance is made for, and $s$ might be connected to this node. In
+which case one of the two rows would disappear. Furthermore, the ground
+node has null potential by definition, there's no related unknown or
+column. One of the two columns disappears. $s$ appears only once in the
+LES with negative sign.
+
+The controlled sources introduce coefficients $s$ which also appear in
+pairs, but here we have the additional freedom that the source is connected
+two one or two non ground nodes and the control input is connected to one
+or two non ground nodes. Consequently, the disappearing row and the
+disappearing column can happen independently resulting in either two
+pairs, or a vertical pair only or a horizontal pair only or a single
+appearance of $s$ (the latter here with positive sign). Summarizing we can
+observe only the following patterns of appearance of $s$ in the LES
+(simplified representation, disregarding other symbols and coefficients):
+\begin{equation}
+\label{eqPatternsOfAppearance}
+\begin{array}{cccc}
+\left(
+\pm s
+\right)
+&
+\left(
+\begin{array}{cc}
+\pm s & \mp s
+\end{array}
+\right)
+&
+\left(
+\begin{array}{c}
+\pm s \\
+\mp s
+\end{array}
+\right)
+&
+\left(
+\begin{array}{cc}
+\pm s & \mp s \\
+\mp s & \pm s \\
+\end{array}
+\right)
+\end{array}
+\end{equation}
+
+It has been proven that all appearing coefficients have the meaning of the
+determinant of a sub-matrice of the LES, see lemma (\ref{eqLemmaCoefIsDet}).
+All such sub-matrices retain the same structural characteristics of the
+appearance of $s$; by extracting a subdeterminant from the matrix a row
+or a column with $s$ might disappear or $s$ might completely disappear,
+but we will never see a new pattern for the remaining symbols in the
+subdeterminant.
+
+According to lemma (\ref{eqLemmaLinCombRowsD}) the value of a determinant
+is not changed if we replace a row or column by the sum of this and
+another row or column, respectively. Applying this operation first to the
+two columns that contain the symbol and then to the two rows that contain
+the symbol, we can always reduce all possible patterns to the simple
+pattern of having the symbol just once in the determinant. (Obviously, it
+doesn't matter if we skip one or both of theses steps in case $s$ appears
+in one of the simpler patterns.)
+
+The coefficients of the LES are sums of differing symbols. A coefficient
+can thus be written as the symbol of interest, $s$, plus a remainder, an
+arbitrary sum of \emph{other} symbols: $a_{ij} = \pm s + R_{ij}$. We can
+modify the determinant of the sub-matrix as follows:
+
+\begin{displaymath}
+\left|
+\begin{array}{ccccc}
+\ddots & & & & \\
+ & \pm s + R_{iu} & \ldots & \mp s + R_{iv} & \\
+ & \vdots & & \vdots & \\
+ & \mp s + R_{ju} & \ldots & \pm s + R_{jv} & \\
+ & & & & \ddots \\
+\end{array}
+\right| = \ldots
+\end{displaymath}
+
+\begin{displaymath}
+\left|
+\begin{array}{ccccc}
+\ddots & & & & \\
+ & \pm s + R_{iu} & \ldots & R_{iu} + R_{iv} & \\
+ & \vdots & & \vdots & \\
+ & \mp s + R_{ju} & \ldots & R_{ju} + R_{jv} & \\
+ & & & & \ddots \\
+\end{array}
+\right| = \ldots
+\end{displaymath}
+
+\begin{equation}
+\label{eqUnificationInSOfSubD}
+\left|
+\begin{array}{ccccc}
+\ddots & & & & \\
+ & \pm s + R_{iu}  & \ldots & R_{iu} + R_{iv}                   & \\
+ & \vdots & & \vdots & \\
+ & R_{iu} + R_{ju} & \ldots & R_{iu} + R_{iv} + R_{ju} + R_{jv} & \\
+ & & & & \ddots \\
+\end{array}
+\right|
+\end{equation}
+
+The modifications of the determinant are shown for the case if
+$s$ appears in the most complex appearance pattern. For the simpler
+patterns less modification steps are required but the final form of
+Equation (\ref{eqUnificationInSOfSubD}) with a single $s$ will be the same.
+
+Only one statement about the $R_{ij}$ is important in this context: They do
+not contain any appearance of symbol $s$.
+
+To compute the value of the determinant, we perform the Laplace expansion
+across row $i$, which still contains the one and only appearance of $s$.
+If we are in column $n\not=u$ the coefficient visited in row $i$ doesn't
+contain $s$ and nor do the subdeterminants we have to multiply with. If we
+are in column $u$ of row $i$ then we have to take the coefficient $s +
+R_{iu}$ times a subdeterminant, which doesn't contain $s$. $R_{iu}$ also
+has no $s$, thus the only term of the product containing $s$ is $s$ times
+the $s$-free subdeterminant, which can only lead to a term of $s$ to the
+power of 1. The further expansion means to sum up all such terms; this
+operation doesn't create any higher power of $s$.
+
+It is proven, that $s$ can't appear in the determinant of any sub-matrix
+with a power higher than 1; it might not appear at all, which means power
+of 0. Since $s$ was an arbitrary chosen symbol out of the set of all
+symbols the prove holds for all the symbols.
+
+
+\section{Prove of numeric factor one in coefficients' addends}
+\label{secProveOfFacOne}
+
+According to lemmas (\ref{eqLemmaCoefIsDet}) and
+(\ref{eqLemmaNoQuadratic}) all coefficients possibly appearing as result
+of an elimination step can be represented as a sum of products of a
+numeric factor and a subset of the device symbols. Here, we will give the
+prove that this factor can only have the values plus and minus one. We
+show, that the expansion of the determinant of any of the sub-matrices of
+the LES only has addends, which differ (i.e. differ in the tuple of
+multiplied symbols). Since all addends (whose sum is the value of the
+determinant) are different in this sense, no pair of two of those can be
+gathered together, which would yield a numeric factor other than absolute
+one.
+
+% @{}: Discard indentation of before and/or behind columns
+\medskip
+\noindent
+%\begin{flushleft}
+\begin{tabular}{p{0.9\textwidth}r}
+Lemma: The numeric factor $f$ mentioned in lemma (\ref{eqLemmaNoQuadratic})
+has a value of either one or minus one.
+& \eqnum \label{eqLemmaFactorOne} \\
+\end{tabular}
+%\end{flushleft}
+\smallskip
+
+\noindent
+In the first step, this is shown for determinants of sub-matrices solely
+containing null values and sums of symbols in the possible appearance
+patterns according to equation (\ref{eqPatternsOfAppearance}).
+
+The prove is recursive, we start with a determinant of dimension two. An
+example of such a subdeterminant is given as illustration. It contains
+five symbols, using all possible appearance patterns at least once:
+
+\begin{displaymath}
+\left|
+\begin{array}{cc}
+s+a-b-d   &   -s+b+d  \\
+-s-a+d    &   s+c-d
+\end{array}
+\right|
+\end{displaymath}
+
+We will show for the particular symbol $s$ that there will be no two
+identical terms in the expansion of the determinant, which contain $s$.
+First we replace the other symbols from the example with a general form,
+the remainders $R_{ij}$, the sums of all other symbols, and bring the
+determinant in the equivalent form with identic value but a single
+appearance of $s$ only; the same has been done in detail in section
+\ref{secProveOfNonQuadraticCoef}:
+
+\begin{displaymath}
+\left|
+\begin{array}{cc}
+\pm s + R_{11}  & R_{11} + R_{i2}                   \\
+R_{11} + R_{21} & R_{11} + R_{12} + R_{21} + R_{22} \\
+\end{array}
+\right|
+\end{displaymath}
+
+If we expand this determinant it is evident that the only term that
+contains $s$ is the product $\pm s(R_{11} + R_{12} + R_{21} + R_{22})$.
+The sum of the four remainders will not contain identical addends: It are
+all four initial remainders, which means that for any symbol holds that
+all its occurrences according to the patterns of equation
+(\ref{eqPatternsOfAppearance}) are summed up. Depending on the appearance
+pattern, the symbol is either eliminated or it appears just once. In the
+previous example we would see $s(a-b-d + b+d + (-a+d) + c-d) = sc$ but
+nothing like $s(a+a) = 2sa$. This is what we wanted to prove.
+
+It's not obvious but trivial to show that the same holds if $s$ has one of
+the other possible appearance patterns in the initial form of the
+determinant. We always end up with $s$ times a sum of the $R_{ij}$ as only
+addend containing $s$. The sum of the $R_{ij}$ either is a single $R_{ij}$
+or the sum of a pair of two neighboured $R_{ij}$. In both cases the sum
+can't contain multiple occurances of any symbol since symbols appearing in
+both $R_{ij}$ will eliminate each other.
+
+Since $s$ was an arbitrarily chosen symbol the same holds true for all
+other symbols as well.
+
+The recursion from dimension $N-1$ to $N$ is done with the Laplace
+expansion of the determinant. Again, we look at the particular symbol $s$
+of the determinant of an arbitrary sub-matrix of dimension $N$ of the LES.
+In the first step we do the same transformation as shown in
+(\ref{eqUnificationInSOfSubD}) and get a determinant of identical value
+and with a single occurrence of $s$.
+
+The transformation doesn't destroy the appearance pattern of any symbol $t
+\not= s$ in a relevant way. An example, using two symbols $s$ and $t$:
+
+\begin{displaymath}
+\left|
+\begin{array}{ccccccc}
+\ddots &               &        &        &        &        &        \\
+       & \pm s + \pm t & \ldots & \mp t  & \ldots & \mp s  &        \\
+       & \vdots        &        & \vdots &        & \vdots &        \\
+       & \mp s         & \ldots &        & \ldots & \pm s  &        \\
+       & \vdots        &        & \vdots &        & \vdots &        \\
+       &         \mp t & \ldots & \pm t  & \ldots &        &        \\
+       &               &        &        &        &        & \ddots \\
+\end{array}
+\right| = \ldots
+\end{displaymath}
+
+\begin{displaymath}
+\left|
+\begin{array}{ccccccc}
+\ddots &               &        &        &        &        &        \\
+       & \pm s + \pm t & \ldots & \mp t  & \ldots & \pm t  &        \\
+       & \vdots        &        & \vdots &        & \vdots &        \\
+       & \mp s         & \ldots &        & \ldots &        &        \\
+       & \vdots        &        & \vdots &        & \vdots &        \\
+       &         \mp t & \ldots & \pm t  & \ldots & \mp t  &        \\
+       &               &        &        &        &        & \ddots \\
+\end{array}
+\right| = \ldots
+\end{displaymath}
+
+\begin{equation}
+\label{eqDetWithSingleSAndTheTs}
+\left|
+\begin{array}{ccccccc}
+\ddots &               &        &        &        &        &        \\
+       & \pm s + \pm t & \ldots & \mp t  & \ldots & \pm t  &        \\
+       & \vdots        &        & \vdots &        & \vdots &        \\
+       &         \pm t & \ldots & \mp t  & \ldots & \pm t  &        \\
+       & \vdots        &        & \vdots &        & \vdots &        \\
+       &         \mp t & \ldots & \pm t  & \ldots & \mp t  &        \\
+       &               &        &        &        &        & \ddots \\
+\end{array}
+\right|
+\end{equation}
+
+\noindent
+Although we see a new appearance pattern for $t$ in the transformed
+determinant this is not relevant. In the next step we expand the
+determinant along the row, which still contains $s$. All subdeterminants
+can't contain $s$. The only terms in the result, which might contain
+symbol $s$ are got, when we reach the column with $s$ and now the
+subdeterminant (whose value has to be taken times $s$) again has the
+required appearance pattern for $t$: The additional occurrences of $t$ do
+not belong to this subdeterminant. The subdeterminant exposes the assumed
+appearance pattern for all its symbols and symbol $s$ doesn't belong to
+these symbols.
+
+What has been shown for our example $t$ holds in general: The two
+operations copy the symbols, which are found in row and column of the
+finally remaining $s$ to another row and column. The symbols at the origin
+of this copying will never be part of the subdeterminant, so there are at
+maximum two new pairs of the copied symbol in the relevant subdeterminant.
+If the other symbol $t$ has a simpler appearance pattern or if it shares
+more positions with $s$ as in the example then there will be only one pair
+or even only a single appearance of $t$ in the subdeterminant due to
+elimination.
+
+The only addends in the final expansion that contain $s$ result from the
+product of $\pm s$ with the value of this subdeterminant; if lemma
+(\ref{eqLemmaFactorOne}) holds for this determinant, than its value
+doesn't contain any term with a numeric factor other than $\pm 1$ and nor
+will the product with $\pm s$ do. In the final expansion result there are
+no two addends containing symbol $s$ times a product of the same sub-set
+of other symbols or with other words there are no addends containing
+symbol $s$ and a numeric factor other than $\pm 1$.
+
+As before, $s$ is an arbitrary chosen symbol, hence these considerations
+hold true for all symbols.
+
+The subdeterminant is a determinant of dimension $N-1$ and it fulfills the
+assumption of the prove, the appearance pattern: The recursion is done,
+the same consideration can be done in turn on this subdeterminant, and so
+on, till we reach our anchor with dimension $N=2$.
+
+In the next step we need to extend the prove to some more patterns: With
+respect to the \emph{symbols} everything has been said but the
+coefficients of the LES also have addends $\pm 1$ or with other words
+addends with all symbols' power equal to null. Arbitrarily placed ones in
+the LES (and hence in the determinant of its sub-matrices) would
+immediately break our prove but fortunately the ones also have specific
+appearance pattern and similar considerations as for the symbols prove
+that lemma (\ref{eqLemmaFactorOne}) still holds.\footnote{The prove could
+end here if the implementation of the software would undergo a minor
+change: The ones in the LES result from the conditions of specific
+devices, mostly the sources. Each of these devices produces ones in pairs,
+that appear in the patterns, which are the prerequisite of the prove so
+far. If the implementation would handle the ones as device specific
+constants, thus make a difference between \emph{this} device's ones and
+\emph{that} device's ones then we had already reached our goal. It would
+indeed mean a minor implementation change only and no significant perform
+loss to do so. However, the actual implementation aggregates all ones in a
+single numeric factor and this requires the extension of the prove.}
+
+
+\subsection{Extension of prove to other devices}
+
+The first part of the prove has been done for matrices with symbols only.
+These matrices exhibit the appearance pattern
+(\ref{eqPatternsOfAppearance}) for all the symbols and their coefficients
+are sums of such symbols and nothing else. We get this kind of matrices
+from networks with passive devices only. The prove is now extended to the
+matrices, which are seen if the other supported devices are part of the
+network.
+
+This part of the prove begins with a single constant voltage source; the
+other devices will be similar. The determinants consisting only of sums of
+symbols result from passive networks without any sources. If we add a
+constant voltage source then the LES is extended by a new row and two new
+columns. (One of the new columns is a new right-hand side of the equation
+system.) The new unknown is the current through the source and it flows
+into one node and returns to the source from another node; this leads to a
+column with a vertical pair of $\pm 1$. The new unknown comes along with
+the additional equation that says that the difference between the source's
+voltage and the potential difference between the connected nodes becomes
+null; this leads to a horizontal pair of $\pm 1$ and the one and only one
+in the new RHS column. This last mentioned one actually has a negative
+sign as the internal representation of the equations is defined such that
+summing up all columns (including the ``RHS'') is equal to null. We get
+the following structure of the LES. The $S_{ij}$ are the sums of the
+symbols:
+
+\begin{equation}
+\label{eqLESWithVoltageSource}
+\left(
+\begin{array}{cccccccc:c}
+ S_{11}  &        &  S_{1i}  &        &  S_{1j}  &        &  S_{1z}  & 0       & 0      \\
+         & \ddots &          & \ddots &          & \ddots &          & \vdots  & \vdots \\
+ S_{m1}  &        &  S_{mi}  &        &  S_{mj}  &        &  S_{mz}  &  \pm 1  &        \\
+         & \ddots &          & \ddots &          & \ddots &          & \vdots  &        \\
+ S_{n1}  &        &  S_{ni}  &        &  S_{nj}  &        &  S_{nz}  &  \mp 1  &        \\
+         & \ddots &          & \ddots &          & \ddots &          & \vdots  & \vdots \\
+ S_{z1}  &        &  S_{zi}  &        &  S_{zj}  &        &  S_{zz}  & 0       & 0      \\
+0        & \ldots &  \pm 1   & \ldots &  \mp 1   & \ldots &        0 & 0       & -1     \\
+\end{array}
+\right)
+\end{equation}
+
+The upper left area of the matrix consists of coefficients $S$, which are
+sums of symbols as seen before, particularly with the typical appearance
+patterns for all the symbols. In the implementation the matrix is not
+necessarily arranged as shown in (\ref{eqLESWithVoltageSource}), the
+additional row and columns may appear at different positions but this has
+no impact on the prove since a rearrangement of rows and columns of a
+determinant is always possible without another effect then a change of
+sign. Which is important is that the pairs $\pm 1$ both appear next to the
+symbols, either in vertical or horizontal direction.
+
+All possible sub-matrices, which we have to investigate, will share the
+appearance with the matrix. These sub-matrices have the upper-left area of
+the matrix besides their last row and column; the last row and column are
+taken from the LES somewhere downwards and somewhere to the right,
+respectively. Which leads to a determinant with
+
+\begin{itemize}
+  \item a symbol area in the upper left corner,
+  \item one right-most column with the pattern of one of the two
+    right-most columns of the LES and
+  \item a bottom row with the pattern of the last row of the matrix.
+\end{itemize}
+
+Depending on which sub-matrix is taken any of the three elements might be
+not present. Furthermore the pairs $\pm 1$ might be reduced to a single
+$\pm 1$ and the right-most column might even contains all nulls.
+(actually, even the original matrix pattern may only contain single ones
+instead of pairs if one of the two related nodes is the ground node.)
+
+Most of the possible patterns of the sub-matrix do not require a further
+consideration. If a column holds only null values it's trivial since the
+determinant is null, too. If the new $\pm 1$-rows or columns are not
+contained it's the same situation as in the first step of the prove. If a
+sub-matrix has inherited the column with the single one then its
+determinant can be expanded along this column and -- disregarding the sign
+-- it can be replaced by the according only subdeterminant, which doesn't
+have such a column.
+
+If a subdeterminant has inherited at least one out of the new row or columns
+then we can modify it similar to the first step of the prove. If a pair
+$\pm 1$ is present in the last row (column) then one of the columns (rows)
+is replaced by the sum of both, which reduces the pair to a single one. We
+will always end up with a determinant with modified symbol area and a row
+and a column (both optional) with all nulls and a single one. The
+modification of such a determinant is show for LES
+(\ref{eqLESWithVoltageSource}); be the number of rows $N$, then equation
+(\ref{eqLESWithVoltageSourceSubDet}) presents $\left|M^{[N]}_{NN}\right|$
+as an example (with no loss of generality the sign of the $\pm 1$ has been
+chosen and set):
+
+\begin{equation}
+\label{eqLESWithVoltageSourceSubDet}
+\left|
+\begin{array}{cccccccc}
+S_{11}        &        & S_{1i}        &        & S_{1i}+S_{1j}  &        & S_{1z}        & 0      \\
+              & \ddots &               & \ddots &                & \ddots &               & \vdots \\
+S_{m1}        &        & S_{mi}        &        & S_{mi}+S_{mj}  &        & S_{mz}        & 1      \\
+              & \ddots &               & \ddots &                & \ddots &               & \vdots \\
+S_{m1}+S_{n1} &        & S_{mi}+S_{ni} &        & S_{mi}+S_{mj}
+                                                  +S_{ni}+S_{nj} &        & S_{mz}+S_{nz} & 0      \\
+              & \ddots &               & \ddots &                & \ddots &               & \vdots \\
+S_{z1}        &        & S_{zi}        &        & S_{zi}+S_{zj}  &        & S_{zz}        & 0      \\
+0             & \ldots & 1             & \ldots & 0              & \ldots & 0             & 0      \\
+\end{array}
+\right|
+\end{equation}
+
+The suggested modifications will reduce the subdeterminant always to a row
+and column (both optional) with all nulls and a single one and a symbol area.
+The expansion is done along the column with the single one and leads to a
+single sub-subdeterminant. It has inherited the special row and can be
+expanded along this row; this in turn leads to a single
+sub-sub-subdeterminant. The latter only contains coefficients from the
+(modified) symbol area. We disregard the sign; the absolute value of the
+determinant (\ref{eqLESWithVoltageSourceSubDet}) is equal to:
+
+\begin{equation}
+\label{eqLESWithVoltageSourceSubDetExpanded}
+\left|
+\begin{array}{ccccc}
+S_{11}        &        & S_{1i}+S_{1j}  &        & S_{1z}        \\
+              & \ddots &                & \ddots &               \\
+S_{m1}+S_{n1} &        & S_{mi}+S_{mj}
+                         +S_{ni}+S_{nj} &        & S_{mz}+S_{nz} \\
+              & \ddots &                & \ddots &               \\
+S_{z1}        &        & S_{zi}+S_{zj}  &        & S_{zz}        \\
+\end{array}
+\right|
+\end{equation}
+
+$S_{ij}$ denotes the original matrix coefficients in the symbol area. Each
+$S_{ij}$ is a sum of any symbols, where the appearance pattern of each
+symbol across the $S_{ij}$ in the original matrix is again described by
+(\ref{eqPatternsOfAppearance}). To end this step of the prove we still
+need to show that in (\ref{eqLESWithVoltageSourceSubDetExpanded}) the
+appearance pattern is unharmed for all symbols. If we e.g. look at the
+middle column: For all rows but the middle it is the sum of the original
+column $j$ with original column $i$. The original row $i$ has been
+scratched out during the expansion of the determinant, so the sum of
+symbols means that a symbol $s$ from original column $i$ has either been
+moved to the middle column or it has been eliminated if in the original
+matrix both columns contained this symbol and due to the inverse signs in
+the appearance patter. Both possibilities retain the appearance pattern
+for $s$. This consideration holds for all symbols in the $S$ and it holds
+likewise for the row operation. Its the same situation as explained above
+for symbol $t$ in determinant (\ref{eqDetWithSingleSAndTheTs}): The
+appearance pattern of the symbols is retained in the relevant
+sub-determinant.
+
+Please note: These considerations include the situation, where the symbol
+area is empty (meaning the area is null not the coefficients). In which
+case the expansion of the subdeterminant will always yield the absolute
+value one.
+
+In the first step lemma (\ref{eqLemmaFactorOne}) has already been proven
+for symbol determinants, which exhibit the appearance pattern
+(\ref{eqPatternsOfAppearance}). In this step we showed that all the
+subdeterminants $\left|M^{(k)}_{ij}\right|$ of matrix or LES
+(\ref{eqLESWithVoltageSource}) can be rearranged to such a symbol
+determinant and consequently at this point the prove is extended to all
+the LES with a single constant voltage source.
+
+The considerations of this step can be applied recursively to handle all
+the LES with any number of constant voltage sources. Additional sources
+add additional rows and pairs of columns to the LES and each have the same
+structure with respect to the ones and null values. All of these rows and
+columns can be reduced to all nulls and a single one in the same way and
+the appearance pattern in the symbol area is still not harmed: If the
+required quality is retained in the first iteration than the output of
+this iteration is legal input to the same prove or consideration again,
+which proves the second iteration, and so on.
+
+The repeated application of the proposed manipulation of the
+subdeterminants just needs one additional consideration: The first
+iteration will not only affect the symbol area but also the other
+additional rows and columns introduced by the other constant voltage
+sources. With two sources the LES (\ref{eqLESWithVoltageSource}) could
+become:
+
+\begin{equation}
+\label{eqLESWith2VoltageSources}
+\left(
+\begin{array}{ccccccccccc:cc}
+S_{11} &        & S_{1i} &        & S_{1j} &        & S_{1k} &        & S_{1z} & 0      & 0      & 0      & 0      \\
+       & \ddots &        & \ddots &        & \ddots &        & \ddots &        & \vdots & \vdots & \vdots & \vdots \\
+S_{m1} &        & S_{mi} &        & S_{mj} &        & S_{mk} &        & S_{mz} & \pm 1  &        &        &        \\
+       & \ddots &        & \ddots &        & \ddots &        & \ddots &        & \vdots &        &        &        \\
+S_{n1} &        & S_{ni} &        & S_{nj} &        & S_{nk} &        & S_{nz} & \mp 1  &        &        &        \\
+       & \ddots &        & \ddots &        & \ddots &        & \ddots &        & \vdots &        &        &        \\
+S_{o1} &        & S_{oi} &        & S_{oj} &        & S_{ok} &        & S_{oz} & 0      & \pm 1  &        &        \\
+       & \ddots &        & \ddots &        & \ddots &        & \ddots &        & \vdots & \vdots &        &        \\
+S_{p1} &        & S_{pi} &        & S_{pj} &        & S_{pk} &        & S_{pz} &        & \mp 1  &        &        \\
+       & \ddots &        & \ddots &        & \ddots &        & \ddots &        & \vdots & \vdots & \vdots & \vdots \\
+S_{z1} &        & S_{zi} &        & S_{zj} &        & S_{zk} &        & S_{zz} & 0      & 0      & 0      & 0      \\
+0      & \ldots & \pm 1  & \ldots & \mp 1  & \ldots & 0      & \ldots & 0      & 0      & 0      & -1     & 0      \\
+0      & \ldots &        & \ldots & \mp 1  & \ldots & \pm 1  & \ldots & 0      & 0      & 0      & 0      & -1     \\
+\end{array}
+\right)
+\end{equation}
+
+Please note, in the example the $\pm 1$ pairs in the two bottom rows share
+a column index. This might happen if the sources are connected to the same
+node but is neither essential for nor contradictory to our argumentation.
+It has been done only to reduce the size of the representation.
+
+Now it is important that the pairs $\pm 1$ in the additional rows and
+columns of the LHS of the LES are all in the index range of the symbol
+area. Furthermore, the appearance pattern of the ones is one of the
+patterns we'd considered for the symbol area. Consequently, the first
+iteration will retain this pattern in all the other additional rows
+(columns) for the same reasons as explained before for the symbols in the
+symbol area. This is why the iteration can then in turn be done on the
+next additional row (column).
+
+Because this recursion can be done lemma (\ref{eqLemmaFactorOne}) is now
+proven for all the LES created from networks consisting of passive devices
+(leading to the symbol area) plus any number of constant voltage sources.
+
+\linnet{} supports more kinds of sources and the ideal operational
+amplifier. All of these devices are handled by introducing additional
+unknown currents and thus adding a LHS column to the LES and an additional
+equation. The constant current source also adds a RHS column. The
+character of the additional rows and columns is always the same; the
+symbols (for controlled sources only) appear in pairs and the only numbers
+are pairs of $\pm 1$ or a single one in a column of nulls otherwise. The
+idea of reducing the additional rows and columns to a single value without
+destroying the appearance pattern of the symbols in the symbol area is the
+same as shown in detail for the constant voltage sources. The determinant
+is then expanded along the rows and columns with single ones until the
+only remaining subdeterminant only consists of a symbol area which the
+statement was proven for in section \ref{secProveOfFacOne}. In general, we
+will never see a numeric factor other than $\pm 1$ in the coefficients of
+the LES.
+
+
+\subsection{Intermediate expressions}
+
+An important note for the implementation is that the prove only holds for
+coefficients that are the result of a completed iteration of the
+elimination. There's no such prove for intermediate results during the
+elimination step. Actually, the elementary step is implemented by first
+adding two products of two coefficients each and then doing the
+factorization. The intermediate sum can indeed have factors other than
+$\pm 1$ due to identical addends in both products. This is one of the
+reasons why the implementation still uses integers instead of Booleans as
+numeric factors.
+
+Nonetheless, the prove is even useful for the intermediate results: An
+implication of the prove is that the numeric factor appearing in the
+intermediate result can only grow incrementally, i.e. one by one with the
+result's addends being figured out in a loop. (In far the most cases it
+still stays absolute one.) The implementation foregos a range check for
+the required integer operations: It's proven that an overrun can occur
+only after a pseudo-infinite computation time and an error report which
+would be printed in an unreachable future is useless and doesn't add any
+value to the software or its behavior.
+
+
+\section{User-defined voltages}
+
+It can be proven that the properties of the coefficients -- no symbol
+powers other than null or one and all numeric factors absolute one -- hold
+for the user-defined voltages, too. User-defined voltages are differences
+of two node potentials, where the two nodes are arbitrarily chosen. If one
+of the nodes is the ground node then the difference is trivial, either an
+existing node potential or the negated value. Obviously the properties are
+retained in these trivial results. It's less evident for the general
+situation of two nodes, whose potentials are both unknowns of the solved
+LES. The symbol powers are still simple, as we compute a difference
+there's no way to get new powers in the products of symbols. However there
+could be addends with same symbol products and same sign of the numeric
+factor, which would lead to a numeric factor of two but no longer absolute
+one. This can be excluded by looking at the LES and how it is transformed
+by using derived unknowns.
+
+Be $M$ the matrix, which represents a LES with m unknowns and $n-m$
+knowns:
+
+\begin{equation*}
+M =
+\left(
+\begin{array}{ccc:ccc}
+a_{11} & \ldots & a_{1m} & a_{1, m+1} & \ldots & a_{1n} \\
+\vdots &        & \vdots & \vdots     &        & \vdots \\
+a_{m1} & \ldots & a_{mm} & a_{m, m+1} & \ldots & a_{mn}
+\end{array}
+\right)
+\end{equation*}
+
+Be the user-defined voltage $\hat U$ the difference of the unknowns in column $u$
+and $v$, i.e. $\hat U = U_u - U_v$. This equation could be put into the LES in
+order to directly figure out the user wanted $\hat U$. We substitute e.g.
+$U_u$ by $U_u = \hat U + U_v$. The LES is transformed into an equivalent
+LES using a new vector of unknowns, where $\hat U$ replaces $U_u$:
+
+\begin{equation*}
+\hat M =
+\left(
+\begin{array}{ccccccc:ccc}
+a_{11} & \ldots & a_{1u} & \ldots & a_{1v} + a_{1u} & \ldots & a_{1m} & a_{1, m+1} & \ldots & a_{1n} \\
+\vdots &        & \vdots &        & \vdots          &        & \vdots & \vdots     &        & \vdots \\
+a_{m1} & \ldots & a_{mu} & \ldots & a_{mv} + a_{mu} & \ldots & a_{mm} & a_{m, m+1} & \ldots & a_{mn}
+\end{array}
+\right)
+\end{equation*}
+
+\noindent
+The new unknown $\hat U$ inherits the coefficients of the
+substituted unknown $U_u$ and the coefficients of unknown $U_v$ become the
+sum of two columns of the original matrix $M$. To apply the elimination
+method according to section (\ref{secEliminationMethod}) for $\hat U$ we
+need to swap two columns so that $\hat U$ becomes the last unknown in the
+again new vector of unknowns:
+
+\begin{equation*}
+\tilde M =
+\left(
+\begin{array}{ccccccc:ccc}
+a_{11} & \ldots & a_{1m} & \ldots & a_{1v} + a_{1u} & \ldots & a_{1u} & a_{1, m+1} & \ldots & a_{1n} \\
+\vdots &        & \vdots &        & \vdots          &        & \vdots & \vdots     &        & \vdots \\
+a_{m1} & \ldots & a_{mm} & \ldots & a_{mv} + a_{mu} & \ldots & a_{mu} & a_{m, m+1} & \ldots & a_{mn}
+\end{array}
+\right)
+\end{equation*}
+
+The solution for $\hat U$ is an expression consisting of the $n-m+1$
+right-most coefficients of the last row of $\tilde M$ after the last
+elimination step. Using the position indexes of $\tilde M$ these are
+$a^{(m-1)}_{mm}$ till $a^{(m-1)}_{m,n}$. According to lemma
+(\ref{eqLemmaCoefIsDet}) these coefficients are the determinants of
+$\tilde M^{[m]}_{mm}$ till $\tilde M^{[m]}_{mn}$, respectively.
+
+Disregarding the sign change due to the swapping of columns,
+$|M^{[m]}_{mm}|$ is the unchanged system determinant: If we replace column
+$v$ with the difference of itself and column $m$, which doesn't alter the
+determinant's value according to lemma (\ref{eqLemmaLinCombRowsD}), then
+we have the same determinant as for the original LES $M$.
+
+The $n-m$ other determinants share the left-most $m-1$ columns of $\tilde
+M$ and have columns $m+1$ till $n$ of $\tilde M$ as right-most column.
+These determinants contain the column $v$ with the sum of two original
+coefficients but don't contain the column where the added coefficients
+origin (i.e. column $m$ of $\tilde M$ or column $u$ of the original matrix
+$M$). With respect to the appearance patterns of symbols according to
+(\ref{eqPatternsOfAppearance}) this means a move of the symbols from the
+original column $u$ to column $v$, which doesn't harm the patterns. Due to
+elimination particular symbols might show a different pattern but all
+appearing patterns are still as listed in (\ref{eqPatternsOfAppearance}).
+Since the appearance patterns are the prerequisite for the proves of the
+properties of the coefficients of the elimination steps these proves still
+hold for the $n-m$ coefficients which form the numerators of the solution
+for $\hat U$.
+
+All coefficients that form the solution of the user-defined voltage $\hat
+U$ have the same properties as shown for the coefficients of the actually
+solved LES with the original unknowns. Also in the user-defined voltages
+we will never see a numeric factor other than absolute one and there won't
+be any symbol with a power of higher than one.
+
+\section{Implementation of elementary step}
+
+This section explains the implementation of the elementary step of the
+elimination method (see section \ref{secEliminationMethod}). This
+operation combines the four matrix coefficients under progress and the
+common divisor to a new coefficient, the resulting coefficient of that
+elimination step. The implementation is not done very explicit but uses
+simplifications and omissions, which are justified in the following. The
+source code is not self-explaining and will be hard to understand without
+the explanations given here.
+
+The elementary step is defined as
+
+\begin{equation}
+\label{eqElemStep}
+a^{(k)}_{ij} = \frac{a^{(k-1)}_{kk} a^{(k-1)}_{ij} - a^{(k-1)}_{ik} a^{(k-1)}_{kj}}
+                    {a^{(k-1)}_{(k-1)(k-1)}}
+\end{equation}
+
+\noindent
+in elimination step $k$. For all affected $a^{(k)}_{ij}$ -- including the
+resulting $a^{(k)}$ at the LHS of equation (\ref{eqElemStep}) -- it holds
+due to former proves:
+\begin{itemize}
+  \item $a$ is a sum of addends. Each addend is a product of symbols to
+    the power of either null or one and a numeric factor of either plus or
+    minus one
+  \item No two addends of $a$ have the same product of symbols, i.e. the
+    vectors of powers are different between all pairs of addends
+\end{itemize}
+
+It follows that the result of the division can be carried out without a
+remainder. With other words, the numerator of equation (\ref{eqElemStep})
+step can be brought into the shape of a product of a coefficient with the
+above properties and the denominator of equation (\ref{eqElemStep}).
+
+The implementation basically follows the definition of the elementary
+step. It carries out the first product of the numerator by multiplying and
+summing up all pairs of addends between first and second factor. This is
+followed by the second product; here the products of the pairs of addends
+are immediately subtracted from the sum so far. After this step a
+polynomial division is carried out.
+
+The mentioned omissions relate to such (intermediate) terms we can predict
+for that they won't appear in the final result because of the known
+properties of this result. These terms are simply discarded but neither
+summed up nor stored.
+
+A hypothetic implementation of the data representation is introduced,
+which can represent all coefficients and all intermediate and the final
+result (referred to as ``variable'' in the following). This implementation
+is actually not used but below we will justify why it can be safely
+reduced to the actually implemented variable representation.
+
+The product of the addends of the coefficients in the numerator can
+produce symbol powers of 0, 1 or 2. The hypothetic implementation of a
+variable will use a 2 Bit integer value to store a symbol's power. It'll
+furthermore order these two Bit values in a certain order of symbols,
+which is defined arbitrarily but fixed for all variables. (Alphabetic
+order of symbols would e.g. suffice.) Reading this sequence of bits as a
+whole as an unsigned binary number gives us a one-by-one relation between
+any appearing combination of symbols and an integer number. We call this
+number the ``value'' of the symbols or simply symbol value of an addend of
+the variable. In this sense products of symbols become an ordered set.
+
+The addends of a variable will always be ordered in decreasing order of
+their symbol value.
+
+For the input variables we know that the numeric factor of each addend is
+$\pm 1$ but this is not proven (and indeed not the truth) for the
+numerator in equation (\ref{eqElemStep}); its two addends can contribute
+with same symbol combinations. Therefore the implementation needs to use
+an integer type here.
+
+For the further we assume that all input variables, all intermediate
+results and the final result are represented in the outlined form.
+
+The order of addends according to their symbol value is important for the
+further and therefore we now have a look at the required operations product
+and quotient of addends with respect to the symbol value:
+
+The product of two addends is figured out by multiplying their numeric
+factors. The result is an integer as the operands are. The products of
+symbols are multiplied by adding the powers. All the 2 Bit fields have to
+be added separately, one pair of 2 Bit values for each symbol. However,
+since we only add two values each either null or one, we will never see an
+overrun in any of the 2 Bit sums and therefore the result of all the 2 Bit
+sums is identical to the arithmetic sum of the symbol values of the
+addends. This implies for example that the product of a variable with an
+addend will not change the order of addends -- the symbol value of all
+addends rises by the same value, the symbol value of the multiplied
+addend.
+
+The quotient is analog. Now, the symbol powers are subtracted. Instead of
+subtracting all the 2 Bit values of the distinct symbols separately we can
+directly subtract the entire symbol values of the affected addends. We
+will only perform divisions which are possible; this is why there won't
+ever be an underrun in any of the 2 Bit differences and this is why the 2
+Bit operations again can be computed as a single arithmetic difference of
+symbol values.
+
+Based on what has been said so far and adding some straightforward
+algorithmics the numerator of equation (\ref{eqElemStep}) can be figured
+out and stored in the hypothetic data representation. The products of
+coefficients are reduced to the sum of all crosswise products of addends
+and the sum of addends is a matter of list sorting according to the symbol
+value of the addends and adding the numeric factors.
+
+In the hypothetic implementation the polynomial division starts when all
+addends of the numerator in equation (\ref{eqElemStep}) are figured out. A
+loop iterates along the numerator variable in decreasing order of the
+symbol value, i.e. from the left to the right. The computation finishes
+when the last addend of the numerator has been processed. The first
+operation is to divide the addend under progress by the first, left-most
+addend of the denominator variable. Three possibilities exist:
+
+\begin{compactenum}[a)]
+  \item The division is possible with respect to the symbols (i.e. the
+    numerator addend contains a superset of symbols of the denominator
+    addend) and results in symbol powers of either null or one
+  \item Like a) but at least one symbol power of two results
+  \item The division is not possible (i.e. the numerator addend lacks
+    at least one symbol from the denominator addend's set)
+\end{compactenum}
+
+Please note, that the division of the numeric factors of the addends will
+always succeed without a remainder: The denominator variable is an
+unmodified input coefficient, which is proven to have numeric factors
+of $\pm 1$ only.
+
+The hypothetic implementation continues in all three cases:
+\begin{compactenum}[a)]
+  \item The result of the division is put into the result variable as
+    its next addend
+  \item Like a) but here we can predict that a later contribution to
+    the result will eliminate this addend again; we know that the final
+    result won't contain addends with symbol powers greater than one
+  \item The numerator addend is left as is in the numerator variable. For
+    now this is a remainder of the polynomial division. The operation is
+    completed and the loop of the polynomial division will handle the next
+    numerator addend
+\end{compactenum}
+
+In cases a) and b) the back-multiplication is carried out as a principle
+of the polynomial division. The new result addend is multiplied with all
+addends of the denominator and each product of addends is subtracted from
+the numerator variable, which gets the meaning of the still undivided
+remainder of the operation. The number of products is finite and defined
+by the given length of the denominator variable. Obviously, the first
+subtracted product eliminates the addend under progress of the numerator
+variable, the following are sorted into this variable; they might
+eliminate existing terms, constitute new ones or change the numeric factor
+of existing ones.
+
+All variables are ordered in falling symbol value of the addends. This
+means that the first subtracted product, which is got by
+back-multiplication with the first addend of the denominator has a higher
+symbol value than all other addends of the back-multiplication. This first
+addend eliminates the addend under progress in the numerator; all further
+might remain in the numerator. Due to the order of addends of the
+numerator the addend under progress is the one with the currently still
+highest symbol value. Consequently and although the back-multiplication
+can lengthen the numerator variable it can be said that the highest
+remaining symbol power in the numerator is lower than before (remainders
+according to case c) are disregarded here) and that all possibly new
+addends in the numerator are to the right of the addend under progress and
+will be processed later in the main loop.
+
+
+\subsection{Finiteness of algorithm}
+
+The last statement already proves the finiteness of the algorithm.
+Although the numerator can become longer due to the back-multiplication
+the highest symbol value, i.e. the symbol value of the addend under
+progress, is lowered in every cycle of the main loop. At latest when this
+symbol value is lower than the symbol value of the left-most addend of the
+denominator the algorithm would terminate: If the symbol value of the
+divisor's addend is greater than the symbol value of the numerator's
+addend then at least one symbol is missing in the numerator's symbol
+product to make the division possible. The addend under progress and all
+further addends (which have even lower symbol values) would belong to case
+c) and hence be part of the remainder of the division.
+
+
+\subsection{Omission of addends}
+
+The real implementation of the elementary step discards some addends during
+computation of the numerator of (\ref{eqElemStep}) and during
+back-multiplication in the polynomial division. When reading the source
+code this looks arbitrarily if not faulty. The prove why it can be
+safely done follows.
+
+Each addend is tested whether the division with the left-most addend of the
+denominator is possible. As the numeric factor of all the denominator
+addends is absolute one this is just a matter of ``fitting'' symbols: All 2
+Bit power values of the tested addend need to be greater or equal to the
+according 2 Bit values of the denominator addend.
+
+Let's have a closer look at case c) of the hypothetic implementation: The
+addend under progress can't be divided by the denominator's addend and it
+is preliminarily left as an addend of the remainder of the quotient. From
+our prerequisites we know that the division can be carried out without a
+remainder so at the end of the operation the left addend must have
+disappeared. On the first glance this seems to be possible by elimination
+of the unwanted addend by subtracted addends from the back-multiplication
+with later computed result terms. However due to the sort order according
+to the symbol values we can exclude this: All subsequently handled numerator
+terms have lower symbol values and consequently no subsequently subtracted
+addend from the back-multiplication will ever have a symbol value greater
+or equal to the symbol value of the unwanted addend and it would remain till
+the end of the complete operation. This is contradictory to the prove of a
+remainder-less quotient. Which means that it can't ever happen that the
+main loop encounters a numerator addend under progress, which can't be
+divided by the left-most denominator addend. Case c) was necessary for the
+explanation but doesn't ever occur and needs not to be considered by the
+actual implementation.
+
+The last statement does not mean that there can't be any addends in the
+numerator, which can't be divided by the left-most denominator addend --
+it's rather a matter of \emph{when} they may appear: They can appear
+during and at the end of the computation of the sum of products in the
+numerator of (\ref{eqElemStep}) and they can even remain in the numerator
+variable during the polynomial division until the main loop processes
+their preceding addend -- at latest now they will be eliminated by addends
+from the back-multiplication. Earlier elimination is also possible: During
+computation of the numerator expression such addends might first appear as
+a result of the first product and later be eliminated by addends from the
+second product. Anyhow, it's for sure that they will be eliminated from
+the numerator variable prior to the attempt to divide them by the
+left-most addend of the denominator. Instead of keeping track of addends
+that will be anyway eliminated somewhere in the future the real
+implementation decides to discard them immediately. If one of the products
+yields an indivisible addend it is thrown away without any ado. Most
+likely, counterparts of these addends will appear during the
+back-multiplication; now the implementation needs to throw them away, too
+-- elimination in the numerator by subtraction can't succeed due to the
+former decision.
+
+Similar considerations hold for case b). The products in the numerator of
+(\ref{eqElemStep}) can yield symbols to the power of two. If such an
+addend is divisible by the left-most addend of the denominator we can get
+a result term with symbol powers of two. From our prerequisites it's yet
+for sure that this addend won't appear in the final result. So there must
+be a later contribution to the result, which eliminates the unwanted
+result term again. However, due to the sort order of the numerator
+addends, all later result addends will have symbol values that are lower
+than the one of the unwanted addend and the elimination of an already
+found result term is simply impossible. This is a contradiction with the
+prove of symbol powers only being null or one. Which means that it can't
+ever happen that the main loop encounters a numerator addend under
+progress, which yields a power of two for at least one symbol when being
+divided by the left-most denominator addend.
+
+The rest is just the same: Such addends may temporarily occur in the
+numerator variable but they are surely eliminated before the main loop
+reached them, before they become the addend under progress. Elimination
+can occur due to negated addends during the computation of the second
+numerator product or due to subtraction of back-multiplication addends in
+earlier cycles of the main loop of the polynomial division. Anyhow, the
+main loop will never encounter and process such an addend and this is why
+the real implementation immediately discards such addends during the
+computation of the numerator of (\ref{eqElemStep}) and why it then has to
+throw according counterpart-addends away during back-multiplication.
+
+A further optimization becomes possible in the real implementation: Any
+numerator addend which yields a power of two for at least one symbol after
+division is immediately thrown away, thus not stored in the numerator
+variable. All stored addends yield symbol powers of either null or one
+after division by the left-most addend of the denominator. The real
+implementation doesn't safe the addends of the numerator of
+(\ref{eqElemStep}) but the addends of (\ref{eqElemStep}) \emph{after}
+division by the left-most addend of the denominator. This is possible
+because any addend which can't be divided for one of the two criteria is
+discarded, as said. Consequently, the real implementation can use 1 Bit
+fields for the symbols.
+
+The hypothetic implementation reduces the product and quotient of symbol
+powers to the arithmetic sum and difference, respectively. The real
+implementation uses bit operations. The operations are equivalent since
+the test ``division is possible'' ensures that there is neither an over- nor
+an underrun of symbol powers from one field into another one. The same
+holds for the two tests themselves: Since the power of three doesn't occur
+anywhere the hypothetic arithmetic 2 Bit operations can be carried out by
+a combination of bit operations only. All of these optimizations lead to
+an efficient real implementation, which is equivalent to the hypothetic
+implementation used in the considerations here.
+
+A last remark is required. The real implementation doesn't store the
+(relevant) addends of the numerator of (\ref{eqElemStep}) but the same,
+already divided by the left-most addend of the denominator. This does not
+change the argumentation of the hypothetic implementation: The division
+means that the symbol value of the left-most addend of the denominator is
+subtracted from all addends in the numerator variable. The order of
+addends is not effected and nor are the considerations affected, which
+base on the statement that a symbol value as large as the symbol value of
+the addend under progress will never be seen again in the
+back-multiplication of this cycle or in any addend of any later cycle of the
+main loop of the polynomial division. All appearing symbol values are lowered
+by a constant value but their mutual relations are not changed.
+
+
+\subsection{Numeric factor one}
+
+In section \ref{secProveOfFacOne} the prove was given that the numeric
+factor in the addends of all appearing coefficients will only be $\pm 1$.
+The prove given here refers to this statement only at one point: The
+division of the numeric factor of the addend under progress by the factor
+of the first addend of the denominator would always succeed as the latter
+is absolute one. Actually, this just shortens the explanations above but
+is irrelevant for the correct operation of the actual implementation. With
+one minor exception the implementation of the elementary step (and the
+elimination method according to section \ref{secEliminationMethod} anyway)
+would continue to work with LESs, where the addends can have arbitrary numeric
+integer factors (but still symbols, which are restricted to a power of
+null or one).
+
+The critical point is the decision a), b) or c). With arbitrary integer
+factors we could expect addends, which are indivisible with regard to a
+remainder-less result of the quotient of the numeric factors. But
+actually, this can never happen for the same reason why case c) couldn't
+occur above: A remainder in the quotient of the numeric factors would mean
+to leave the addend under progress with reduced numeric factor in the
+numerator variable. Due to the consideration with strictly monotonically
+decreasing symbol values this addend could not be eliminated any more - a
+contradiction to the prove of a remainder-less final result.
+
+A difference to the same consideration for the quotient of products of
+symbols is that the addends of the numerator computation, which show
+indivisible numeric factors must not be discarded. Here, combination with
+later addends (i.e. either in the further computation of the numerator of
+equation (\ref{eqElemStep}) or in a later back-multiplication of the
+polynomial division) can change them to hold well divisible numeric
+factors but won't surely eliminate them as shown for addends with
+indivisible symbol products.
+
+The mentioned minor exception from the irrelevance of the factor-one
+statement is the integer overflow handling. If the implementation would be
+applied to a system with arbitrary integer factors overflow recognition
+becomes a must.\footnote{Actually, there's one more change required on the
+implementation: The $\pm 1$ statement is double-checked by assertions.
+These assertions needed to be replaced by an assertion that proved the
+remainder-less division of the numeric factors.} The current use case may
+however safely ignore integer overflows due to the restriction of the
+factors to $\pm 1$.

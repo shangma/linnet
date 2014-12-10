@@ -1,0 +1,57 @@
+/**
+ * @file octagon.cnl
+ *   Test case for linNet.\n
+ * 16 resistors are connected to an even octagon. This test case
+ * demonstrates the power of device relations. The highly complex
+ * computation reduces to a very simple final result for the overall
+ * resistance due to the symmetry of the circuit.\n
+ *   The found solution is easy to prove because of this symmetry. The
+ * voltage at the middle of the octagon needs to be half the input
+ * voltage.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+R R     k1  k2
+R R02   k2  k3  R02=R
+R R03   k3  k4  R03=R
+R R04   k4  k5  R04=R
+R R05   k5  k6  R05=R
+R R06   k6  k7  R06=R
+R R07   k7  k8  R07=R
+R R08   k8  k1  R08=R
+
+R R09   k1  k9  R09=R
+R R10   k2  k9  R10=R
+R R11   k3  k9  R11=R
+R R12   k4  k9  R12=R
+R R13   k5  k9  R13=R
+R R14   k6  k9  R14=R
+R R15   k7  k9  R15=R
+R R16   k8  k9  R16=R
+
+/* The input voltage between top and bottom. */
+U    U1 k1  k5
+
+/* The voltage at the middle of the octagon needs to be half the input
+   voltage due to the symmetry. */
+DEF  U2 k9  k5
+PLOT G  U2  U1
+
+/* The input impedance is computed, which is the wanted overall resistance
+   of the octagon. Can be figured out as 6/7*R due to the symmetry of the
+   circuit. */
+PLOT Z  U1  I_U1

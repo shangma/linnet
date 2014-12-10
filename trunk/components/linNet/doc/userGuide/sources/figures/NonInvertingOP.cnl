@@ -1,0 +1,5 @@
+U  Uin opIn1 GND
+OP OP  opIn1 opIn2 opOut
+R  R1  opOut opIn2
+R  R2  opIn2 GND
+PLOT G U_opOut Uin

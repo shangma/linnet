@@ -1,0 +1,5 @@
+I    Iin  GNDin  N1
+R    Rin  GNDin  N1
+I(U) k    GNDout N2 N1 GNDin
+R    Rout N2     GNDout
+RES  Uout U_N2

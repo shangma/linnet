@@ -1,0 +1,155 @@
+\chapter{Installation}
+
+A valid installation looks like this: The \linnet{} application is a
+simple executable file plus a folder with resources for the Octave code
+generator; this folder is called \file{private} and is located next to the
+\linnet{} executable file, i.e. both are siblings in the same parent
+directory. The environment variable \code{LINNET\_HOME} points to this
+parent directory.
+
+Accordingly, this is what you have to do to install \linnet{}: 
+
+Create an empty folder, the installation directory, e.g.
+\file{/ProgramFiles/linNet}. Copy the \linnet{} executable file into this
+directory. Copy the folder \file{private} into this folder. Create a
+persistent environment variable \code{LINNET\_HOME} and assign the path to
+the installation directory, \code{/ProgramFiles/linNet} in our example.
+
+The usual way to use \linnet{} is to run it from a shell window. You will
+probably organize your input circuits in a folder or a set of such and
+\code{cd} in your shell to this folder. To run \linnet{} in this scenario
+in a convenient way it is useful to place a reference to the installation
+directory in the system environment variable \code{PATH}. In our example
+you'd append \code{:/ProgramFiles/linNet} (UNIX) and
+\code{;\bs{}ProgramFiles\bs{}linNet} (Windows) to the current value of
+this variable.
+
+The definition of a shell command alias pointing to the \linnet{}
+executable file can be a reasonable alternative to extending the
+environment variable \code{PATH}.
+
+If the environment variable is not set then \linnet{} makes an attempt to
+find its resources via the path to itself. However, it depends on the
+system, the shell in use and the way the command is typed, whether this
+information is completely passed to the application or not. If it can't
+find out where to find itself it'll refuse to generate Octave
+code.\footnote{There are system specific functions which let an
+application find out, where its executable file is located, e.g.
+\code{GetModuleFileName} for Windows, but the use of such functions would
+make \linnet{} system dependent. This price is much too high for an a bit
+simpler installation.} Not setting the environment variable can be a safe
+option if you decide to run \linnet{} solely from a shell window with an
+alias, which expands to the full, absolute path of the executable.
+
+
+\section{Linux and Mac OS}
+
+Unfortunately, Linux and Macintosh users will have to compile \linnet{}
+from the sources prior to use. At the moment no pre-built executables are
+available for these systems. Please refer to section
+\ref{secBuildingLinNet} on page \pageref{secBuildingLinNet}.
+
+
+\section{Windows}
+
+\subsection{Pre-built executables}
+
+The download of \linnet{} contains pre-build executable files for Windows.
+A build for 32 and 64 Bit is contained, each as DEBUG or PRODUCTION
+compilation. The executable files are already bundled with the resources
+folder \file{private} so that the installation reduces to copying the
+build folder of choice to any location, preferably
+\file{c:\bs{}\-Program\-Files}, which doesn't contain blanks, and setting
+the environment variable \code{LINNET\_HOME}; it would be set to
+\file{c:\bs{}\-Program\-Files\bs{}\-\linnet{}} if the suggested
+installation folder was used.
+
+
+\subsection{Required DLLs}
+
+The build of \linnet{} has the executable file \file{linNet.exe} as only
+product. This executable file is however not self-contained; the
+application is linked against the compiler's C libraries, which in case of
+the GNU compiler collection build on some Windows DLLs. These DLLs need to
+be available in order to execute \linnet{}. Normally, this should always
+be the case. In the rare case that such a library should be missing on
+your system then the only way out will be to install the GCC port of MinGW
+and to rebuild \linnet{}. If you can run the simplest \code{helloWorld}
+application compiled with GCC then you should also be able to run
+\linnet{}.
+
+For a Windows 7 system and using the 32 Bit build the following list of
+DLLs appeared to be loaded by \linnet{}. For different Windows releases or
+for the 64 Bit build the list may vary:
+
+\begin{verbatim}
+c:\Windows\SYSTEM32\ntdll.dll
+c:\Windows\SYSTEM32\wow64.dll
+c:\Windows\SYSTEM32\wow64cpu.dll
+c:\Windows\SYSTEM32\wow64win.dll
+c:\Windows\SysWOW64\ntdll.dll
+c:\Windows\syswow64\KERNELBASE.dll
+c:\Windows\syswow64\kernel32.dll
+c:\Windows\syswow64\msvcrt.dll
+\end{verbatim}
+
+
+\subsection{Start from Windows Explorer (file name association)}
+
+If you want to start the computation of transfer functions directly from
+the Windows Explorer then you can add a file class definition to the
+Windows Registry. It'll extend the context menu entries of the Explorer
+for circuit netlist files. With right-click on the file you can load the
+netlist file into a text editor and by double-click you can run the
+computation with \linnet{}. Please note, if starting \linnet{} this way
+Windows will swallow all the program output and you will have to open the
+log file after computation to find out if the computation was successful.
+
+Here's a template for a Windows registry script to make an appropriate
+file class definition:
+
+{\footnotesize
+\begin{verbatim}
+REGEDIT4
+
+[HKEY_CLASSES_ROOT\.cnl]
+@="FileClass_cnl"
+
+[HKEY_CLASSES_ROOT\.ckt]
+@="FileClass_cnl"
+
+[HKEY_CLASSES_ROOT\FileClass_cnl]
+@="linNet Circuit Netlist"
+
+[HKEY_CLASSES_ROOT\FileClass_cnl\shell]
+@="Compute"
+
+[HKEY_CLASSES_ROOT\FileClass_cnl\DefaultIcon]
+@="c:\\ProgramFiles\\linNet\\linNet.exe,1"
+
+[HKEY_CLASSES_ROOT\FileClass_cnl\shell\Edit]
+@="&Edit"
+[HKEY_CLASSES_ROOT\FileClass_cnl\shell\Edit\command]
+@="c:\\ProgramFiles\\emacs-24.0.92\\bin\\emacsclient.exe -n \"%1\""
+
+[HKEY_CLASSES_ROOT\FileClass_cnl\shell\Compute]
+@="Run linNet"
+[HKEY_CLASSES_ROOT\FileClass_cnl\shell\Compute\command]
+@="c:\\ProgramFiles\\linNet\\linNet.exe -l -c -s -o \"%1\" %*"
+\end{verbatim}
+} % End of decreased script size for the listing
+
+Copy this code into a text file. Save it using a file name with extension
+\file{.reg}, e.g. \file{fileClassCnl.reg}.
+
+Please note, that you will have to modify the proposed code as it uses
+absolute paths to the installed applications; replace these paths with
+your system's paths. Furthermore, the text editor for editing the circuit
+netlists is just a suggestion; you will probably replace the reference to
+Emacs with a reference to your favorite text editor.
+
+After customization, double-click this file or run it from a shell window.
+If your system has no file name association for \file{*.reg} files then
+you need to import it explicitly using a command like \code{regedit.exe
+fileClassCnl.reg}. In either case you will need local administrator rights
+to complete.
