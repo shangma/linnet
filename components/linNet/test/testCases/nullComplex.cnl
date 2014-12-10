@@ -1,0 +1,40 @@
+/**
+ * @file null.cnl
+ *   Test case for linNet.
+ * This test case proves that a not stimulated system is handled well. It
+ * uses a common circuit.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+//U  Uin IN  GND
+
+OP op  OP1 GND OPQ
+
+R  R   IN  OP1 R = .159155
+
+R  Rt1 OP1 P1  Rt1 = R    
+C  Ct1 OP1 P1  Ct1 = 10m  
+
+R  Rt2 P1  P2  Rt2 = R    
+C  Ct2 P1  P2  Ct2 = 100u 
+
+R  Rt3 P2  P3  Rt3 = R    
+C  Ct3 P2  P3  Ct3 = 1u   
+
+R  Ru  P3  OPQ Ru = R    
+                     
+RES G U_OPQ

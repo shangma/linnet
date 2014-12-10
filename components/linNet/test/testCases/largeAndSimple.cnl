@@ -1,0 +1,157 @@
+/**
+ * @file largeAndSimple.lnc
+ *   Test case for linNet.
+ * This test case proves, that the maximum number of devices can be safely
+ * used. The complexity of the interconnections is kept as simple as
+ * possible to avoid lengthy to pseudo-infinite computation times. In fact
+ * we have all unconnected trivial sub-circuits.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U U01 K01 gnd01; R R01 K01 gnd01
+U U02 K02 gnd02; R R02 K02 gnd02
+U U03 K03 gnd03; R R03 K03 gnd03
+U U04 K04 gnd04; R R04 K04 gnd04
+U U05 K05 gnd05; R R05 K05 gnd05
+U U06 K06 gnd06; R R06 K06 gnd06
+U U07 K07 gnd07; R R07 K07 gnd07
+U U08 K08 gnd08; R R08 K08 gnd08
+U U09 K09 gnd09; R R09 K09 gnd09
+U U10 K10 gnd10; R R10 K10 gnd10
+U U11 K11 gnd11; R R11 K11 gnd11
+U U12 K12 gnd12; R R12 K12 gnd12
+U U13 K13 gnd13; R R13 K13 gnd13
+U U14 K14 gnd14; R R14 K14 gnd14
+U U15 K15 gnd15; R R15 K15 gnd15
+U U16 K16 gnd16; R R16 K16 gnd16
+U U17 K17 gnd17; R R17 K17 gnd17
+U U18 K18 gnd18; R R18 K18 gnd18
+U U19 K19 gnd19; R R19 K19 gnd19
+U U20 K20 gnd20; R R20 K20 gnd20
+U U21 K21 gnd21; R R21 K21 gnd21
+U U22 K22 gnd22; R R22 K22 gnd22
+U U23 K23 gnd23; R R23 K23 gnd23
+U U24 K24 gnd24; R R24 K24 gnd24
+U U25 K25 gnd25; R R25 K25 gnd25
+U U26 K26 gnd26; R R26 K26 gnd26
+U U27 K27 gnd27; R R27 K27 gnd27
+U U28 K28 gnd28; R R28 K28 gnd28
+U U29 K29 gnd29; R R29 K29 gnd29
+U U30 K30 gnd30; R R30 K30 gnd30
+U U31 K31 gnd31; R R31 K31 gnd31
+U U32 K32 gnd32; R R32 K32 gnd32
+U U33 K33 gnd33; R R33 K33 gnd33
+U U34 K34 gnd34; R R34 K34 gnd34
+U U35 K35 gnd35; R R35 K35 gnd35
+U U36 K36 gnd36; R R36 K36 gnd36
+U U37 K37 gnd37; R R37 K37 gnd37
+U U38 K38 gnd38; R R38 K38 gnd38
+U U39 K39 gnd39; R R39 K39 gnd39
+U U40 K40 gnd40; R R40 K40 gnd40
+U U41 K41 gnd41; R R41 K41 gnd41
+U U42 K42 gnd42; R R42 K42 gnd42
+U U43 K43 gnd43; R R43 K43 gnd43
+U U44 K44 gnd44; R R44 K44 gnd44
+U U45 K45 gnd45; R R45 K45 gnd45
+U U46 K46 gnd46; R R46 K46 gnd46
+U U47 K47 gnd47; R R47 K47 gnd47
+U U48 K48 gnd48; R R48 K48 gnd48
+U U49 K49 gnd49; R R49 K49 gnd49
+U U50 K50 gnd50; R R50 K50 gnd50
+U U51 K51 gnd51; R R51 K51 gnd51
+U U52 K52 gnd52; R R52 K52 gnd52
+U U53 K53 gnd53; R R53 K53 gnd53
+U U54 K54 gnd54; R R54 K54 gnd54
+U U55 K55 gnd55; R R55 K55 gnd55
+U U56 K56 gnd56; R R56 K56 gnd56
+U U57 K57 gnd57; R R57 K57 gnd57
+U U58 K58 gnd58; R R58 K58 gnd58
+U U59 K59 gnd59; R R59 K59 gnd59
+U U60 K60 gnd60; R R60 K60 gnd60
+U U61 K61 gnd61; R R61 K61 gnd61
+U U62 K62 gnd62; R R62 K62 gnd62
+U U63 K63 gnd63; R R63 K63 gnd63
+U U64 K64 gnd64; R R64 K64 gnd64
+
+// One full result as a kind of prototype: The requested currents should
+// show the dependency only on the related input voltages.
+RES I01_I64_full I_U01	I_U64
+
+PLOT I01 I_U01 U01
+PLOT I02 I_U02 U02
+PLOT I03 I_U03 U03
+PLOT I04 I_U04 U04
+PLOT I05 I_U05 U05
+PLOT I06 I_U06 U06
+PLOT I07 I_U07 U07
+PLOT I08 I_U08 U08
+PLOT I09 I_U09 U09
+PLOT I10 I_U10 U10
+PLOT I11 I_U11 U11
+PLOT I12 I_U12 U12
+PLOT I13 I_U13 U13
+PLOT I14 I_U14 U14
+PLOT I15 I_U15 U15
+PLOT I16 I_U16 U16
+PLOT I17 I_U17 U17
+PLOT I18 I_U18 U18
+PLOT I19 I_U19 U19
+PLOT I20 I_U20 U20
+PLOT I21 I_U21 U21
+PLOT I22 I_U22 U22
+PLOT I23 I_U23 U23
+PLOT I24 I_U24 U24
+PLOT I25 I_U25 U25
+PLOT I26 I_U26 U26
+PLOT I27 I_U27 U27
+PLOT I28 I_U28 U28
+PLOT I29 I_U29 U29
+PLOT I30 I_U30 U30
+PLOT I31 I_U31 U31
+PLOT I32 I_U32 U32
+PLOT I33 I_U33 U33
+PLOT I34 I_U34 U34
+PLOT I35 I_U35 U35
+PLOT I36 I_U36 U36
+PLOT I37 I_U37 U37
+PLOT I38 I_U38 U38
+PLOT I39 I_U39 U39
+PLOT I40 I_U40 U40
+PLOT I41 I_U41 U41
+PLOT I42 I_U42 U42
+PLOT I43 I_U43 U43
+PLOT I44 I_U44 U44
+PLOT I45 I_U45 U45
+PLOT I46 I_U46 U46
+PLOT I47 I_U47 U47
+PLOT I48 I_U48 U48
+PLOT I49 I_U49 U49
+PLOT I50 I_U50 U50
+PLOT I51 I_U51 U51
+PLOT I52 I_U52 U52
+PLOT I53 I_U53 U53
+PLOT I54 I_U54 U54
+PLOT I55 I_U55 U55
+PLOT I56 I_U56 U56
+PLOT I57 I_U57 U57
+PLOT I58 I_U58 U58
+PLOT I59 I_U59 U59
+PLOT I60 I_U60 U60
+PLOT I61 I_U61 U61
+PLOT I62 I_U62 U62
+PLOT I63 I_U63 U63
+PLOT I64 I_U64 U64

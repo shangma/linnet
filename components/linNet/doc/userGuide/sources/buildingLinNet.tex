@@ -1,0 +1,160 @@
+\chapter{Building \linnet{}}
+\label{secBuildingLinNet}
+
+\linnet{} is distributed as source code together with makefiles to compile
+and link the code. The distribution contains ready-to-use binaries for
+Windows, for both the win32 and win64 ABI and as debug or production
+compilation\footnote{Windows 7 has been used.}. In all other environments
+a build of the sources needs to be done prior to the use of \linnet{}.
+
+To start the build you need to \code{cd} in a shell window to the root
+directory of the \linnet{} distribution, where the file \file{GNUmakefile}
+is located. Here, you issue the command:
+\begin{verbatim}
+make build
+\end{verbatim}
+The makefile has some more useful targets and options than just
+\ident{build}. Tpye \code{make help} to find out.
+
+
+\section{Portability of makefiles}
+
+The makefile -- actually it is a set of nested makefiles -- is compatible
+with the GNU make processor of at least revision 3.81; 3.80 is not
+sufficient. Different derivates of make always tended to be quite
+incompatible to one another and other derivates of make will hence need
+heavy modifications of the makefiles.
+
+The makefiles directly support the build of the software for Windows with
+GCC in the MinGW 32 and 64 Bit ports. The compilation and the compiled
+software have been tested with GCC 4.5.2 (32 Bit) and 4.8.1 (64 Bit) and
+under Windows 7 only. Other revisions may cause problems: Even between
+these two severe incompatibilities have been found, which had to be
+tackled by conditional code (see below).
+
+The makefile needs to know, where GCC is installed. For Windows systems
+the environment variable \ident{MINGW\_\-HOME} has been introduced. It may
+be used to specify the root folder of a MinGW installation. If it is set,
+either persistently or -- e.g. to be able to switch between 32 Bit and 64
+Bit builds -- on the command line of the make processor then the directory
+\file{\$\{MINGW\_\-HOME\}/bin} supersedes the normal system search path. If
+the variable is not set then all executables will be located via the
+system search path as specified in environment variable PATH. Please refer
+to file \file{locateTools.mk} for details.\footnote{Although designed for
+Windows, where typically several different competing ports of GCC can
+reside, the environment variable can be used for Linux and Mac OS, too.
+Don't bother with the name but let the variable point to the parent folder
+of GCC's bin folder.}
+
+The makefiles are designed to support the compilation under Linux and Mac
+OS also. GNU make's \code{if}/\code{else}/\code{endif} statements have
+been applied to do so. This has however never been tested and will
+probably not work out of the box. Particularly, you should have a look at
+the tool localization in \file{locateTools.mk} and the compiler and linker
+command line options in \file{compileAndLink.mk}.
+
+
+\subsection{Resource compiler}
+
+Under Windows the application icons are added to the executable binary
+file. This has no functional aspect; the image data is not accessed from
+the functional code. It's just a gimmick that allows to create illustrated
+associations between \linnet{} in- and output files and the executable in
+the file system browser.
+
+In the makefile the according build rules are placed in
+\code{if}/\code{endif} clauses; they should have no effect under either
+Linux or Mac OS. Similar mechanisms will probably exist for these operating
+systems as well. You may consider to extend the makefiles by adding
+appropriate \code{else} paths; an OS indicating variable already exists.
+
+
+\section{Portability of source code}
+
+The source code itself is system independent; only the abstract functions
+from the GNU C library are used.
+
+The compilation with a different compiler tool chain (including another
+revision or port of GCC) will probably introduce some changes on the
+source files. The applied compiler needs to support the standard C99.
+
+
+\subsection{GNU extensions}
+
+In module \ident{rat\_rationalNumber} a GNU extension is used: Initialized
+structs are used as r-values. This has been done for convenience only, to
+achieve at tense and meaningful representation of the required
+functionality. It should however be easy and straightforward to eliminate
+these (few) constructs. All the rest is according to the standard C99.
+
+
+\subsection{Incompatibilities of linked libraries}
+
+Far the most necessary code modifications will result from
+incompatibilities of the linked libraries. Most obvious is the use of
+GCC's Basic Program/System Interface, the command line evaluation support.
+All of the command line evaluation related code will probably require a
+complete re-implementation with another compiler tool chain. Please refer
+to module \ident{opt\_getOpt} for details.
+
+The two tested ports of GCC have different sets of standard functions. The
+MinGW 64 Bit port provides \ident{stricmp} while MinGW 32 Bit doesn't. A
+simple implementation of this function has been added to the \linnet{}
+sources. Depending on the availability of this function in your
+environment you will have to modify the according preprocessor switches to
+let it or don't let it compile the substitute. Please refer to file
+\file{stricmp.h} for details.
+
+The standard function snprintf was found to be buggy in the used 64 Bit
+port of GCC. A work around has been implemented, which is compiled only
+for the 64 Bit MinGW ports. You will have to check if your revision of GCC
+has the same problems and maybe have to modify the preprocessor code that
+controls the conditional compilation of the substitute. Please refer to
+file \file{snprintf.h} for details.
+
+
+\section{Re-entrance of code}
+
+The implementation of \linnet{} is widely but not completely reentrant.
+This can become an issue if the code should be integrated into a
+concurrent environment; for example a client-server structure is set up or
+multi-core support is implemented to speed up the computations. As long as
+the code is used as of today in a single-threaded self-contained
+application the following considerations are irrelevant.
+
+Although the implementation of module \ident{log\_logger} is made in a reentrant
+style, the logging process is not reentrant by principle. All logger
+instances write to the same global stream \ident{stdout} and concurrent
+use would lead to a mess of text at the console. Furthermore, all modules
+of \linnet{} use one and the same global logger instance and they hence
+share the same file stream, too; here, we'd expect a similar mess.
+
+For module \ident{pci\_parserCircuit}, the parser of the circuit netlist
+files, the decision to use a few global variables (e.g. for error
+reporting by side effect) has just been taken for convenience, to keep the
+code lean. An application for a fully reentrant implementation was simply
+not in the scope of the development. It's however straightforward and only
+little effort to make the parser reentrant. One just has to put the few
+global variables into a struct, which gets the meaning of a parser
+instance, add a constructor/destructor pair and pass the pointer to the
+parser instance to all the functions.
+
+The situation differs for the other affected module
+\ident{rat\_rationalNumber}, the implementation of an exact arithmetics
+for rational numbers. Here, the decision to use global data and to loose
+re-entrance has been taken intentionally for performance reasons. A global
+variable is used to report an overflow. In addition, a global logger
+instance is used to visibly report problems. This logger isn't reentrant,
+neither. The client code can check the global variable after completing
+the operations. The flag is persistent and can thus be checked after a
+bunch of operations as an overall result. To avoid the flag we could
+return the overflow indication with every operation but this would lead to
+a manifold of computational effort. Or we could introduce rational number
+processor instances having each their own individual error handlers. The
+overhead of passing the instance pointer to all the functions would
+probably be less than in the first suggestion but still significant.
+
+If the software is used in an environment, where re-entrance is a must then
+serialized access to the module could also be an option. A client is
+queued until the other one has completed its (bunch of) operations and has
+checked the global error information.

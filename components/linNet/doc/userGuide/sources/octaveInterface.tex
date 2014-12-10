@@ -1,0 +1,301 @@
+\chapter{Understanding the Octave Interface}
+\label{secOctaveInterface}
+
+\section{Folders, files and functions}
+
+If the switch \code{-o} is put on the command line of \linnet{} then the
+computed formulas are exported to Octave in form of a set of generated
+scripts (files \file{*.m}). Octave needs to be installed in order to make
+any use of these files. A further prerequisite is the availability of
+package control, which should normally be installed with
+Octave.\footnote{Type \code{pkg list} in the Octave command line to find
+out.} Please visit http://www.gnu.org/software/octave/ for information and
+download.
+
+One dedicated script is generated for each of the results specified in the
+netlist file. The script has the name of the result in the netlist file.
+If no result is specified in the netlist file then \linnet{} uses the
+implicit result definition \ident{allDependents} and the generated Octave
+script has this name, too. All of the result related scripts are bundled
+in a common folder, which is also created and which has the name of the
+netlist file (except for the removed name extension). Several such folders
+will be created if the \linnet{} command line specifies several netlist
+files. All of the created folders are placed in a common target directory,
+which can either be specified as argument of command line option \code{-o}
+or defaults to the current working directory. This directory needs to
+exist, \linnet{} won't create it.
+
+The generated, result related Octave scripts implement Octave functions.
+The functions in turn have the name of the result in the netlist file.
+They are self-contained in the sense that they can be called just like
+that if only the current working directory in the Octave session is the
+folder containing the script file, i.e. the folder that has the name of
+the processed netlist file. If you \code{cd} to the created folder and
+type the name of the result then you should get an Octave figure window
+with either a step response or a Bode plot -- which one depends on the way
+the result was defined. The details of the result definition can be found
+at \ref{secResultSpec} on page \pageref{secResultSpec}.
+
+The next step should be to type \code{help} followed by the name of the
+result.
+
+The generated result related scripts use some (simple) sub-routines. These
+subroutines are implemented as a set of Octave files, which are bundled in
+folder \file{private} that is found inside the created netlist related
+result folder. The contents of folder \file{private} are invariant. As a
+matter of fact, the whole folder is just the copy of a template folder
+located somewhere in the installation of \linnet{}. Therefore, getting
+this folder in every netlist related result folder is actually not
+essential and may even become annoying. (The design decision to do so has
+been taken for convenience, to make the result scripts self-contained and
+immediately usable.) To avoid these redundant files you can consider to
+make a copy of the files in the private folder into any folder holding
+Octave script files and to add this other folder to the Octave search
+path. From now on you would run \linnet{} with command line option
+\code{-i} and folder \file{private} is no longer generated in the created
+result folders. The copied files on the Octave search path will be used
+instead of those in folder \file{private}.
+
+
+\section{The two kinds of generated Octave functions}
+
+Depending on how a user-defined result is specified in the netlist file
+the generated Octave script will define a function of one out of two
+possible kinds. If the netlist command \code{PLOT} is used then the
+generated Octave function will show the Bode plot of a transfer function (or
+frequency response) of the system or one of its variables. If the netlist
+command \code{RES} is used then the generated Octave function will show
+the step response of the system or one of its variables.
+
+The plots are presented if the function is called without assignment of
+the (optional) return values. The simplest way to do so is to just type
+the function name (i.e. result name) on the Octave command line.
+
+
+\section{Symmetries between the two kinds of generated Octave functions}
+
+Regardless of the fundamentally different plots the two kinds of generated
+Octave functions are quite similar.
+
+Both kinds of functions have (nearly) the same signature. The difference
+is only their internal behavior, the internal decision to chose an
+appropriate kind of plot and this behavior is inhibited if a return value
+of the function is consumed by the calling code. If so, both kinds of
+functions behave identical: They generate and return the LTI object and
+maybe the parameter set and a default vector of either frequency values or
+time designations. (This last, optional return value is the only remaining
+difference in the behavior of the two kinds of functions.) As the first
+two return values are far the most relevant ones, both kinds of functions
+can mostly be used in an identical fashion. This means for example, that a
+Bode plot result can easily be used to plot a step response and vice
+versa:
+
+Be \file{G.m} an Octave script generated from a \code{PLOT} command and
+\file{I\_Uin.m} an Octave script generated from a \code{RES} command then
+will the direct call of
+\begin{itemize}
+  \item \code{G} open a figure window with the Bode plot of (transfer
+    function) $G$. This is the internal behavior of \code{PLOT} generated
+    M functions,
+  \item \code{I\_Uin} open a figure window with the step response of
+    (current) $I_{U_{in}}$. This is the internal behavior of \code{RES}
+    generated M functions.
+\end{itemize}
+In contrast to this will a the first return value consuming call like
+\begin{itemize}
+  \item \code{step(G)} open a figure window with the step response of the
+    system described by (transfer
+    function) $G$,
+  \item \code{bode(I\_Uin)} open a figure window with the Bode plot of the
+    transfer function from system input $U_{in}$ to current $I_{U_{in}}$.
+\end{itemize}
+Please note, that this is an example. In general, there are constraints.
+As an example, Octave refuses the Bode plot for systems other than SISO.
+
+Using the generated M functions as argument of enclosing Octave
+expressions works well but is somewhat slow: Each time the
+expression is evaluated another (temporary) LTI object is created by the
+function. This causes a noticeable delay. In most situations it will be
+more appropriate to create the LTI object once in the workspace and to
+continue with the same object. The commands from the last example would
+change to:
+\begin{verbatim}
+  tfG = G; step(tfG)
+  tfI_Uin = I_Uin; bode(tfI_Uin)
+  ...
+  nyquist(tfG)
+\end{verbatim}
+The last line is just meant to demonstrate how to benefit from the once
+and only once created objects.
+
+
+\section{Varying device values}
+
+A netlist file, which is the source of the Octave scripts that create the
+LTI objects, has the option to specify device values. This applies to the
+passive devices and the controlled sources. A resistor can get a value,
+which is understood as resistance in $\Omega$, a conductance can get a
+value in $\frac{1}{\Omega}$, the capacitor is understood in $F$ and the
+impedance in $H$. The device values of controlled sources are understood
+as the proportionality factor between control voltage/current and controlled
+voltage/current. Accordingly, they are dimensionless or understood as
+either $\frac{A}{V}$ or $\frac{V}{A}$.
+
+If the netlist specifies a device value then this value is put into the
+generated Octave script as default value for all numeric computations. For
+\linnet{} itself the value is meaningless, it is not used at all by any
+\linnet{} computation.
+
+All devices which no value is specified for in the netlist will get a
+hard coded standard value as default value in the generated Octave script.
+These standard values depend on the kind of device but do not consider
+values, which might have been specified in the netlist for other devices. A
+mixture of explicitly specified device values and standard values in one
+and the same netlist file is not recommended.
+
+\begin{table}[bt]
+\begin{center}
+\begin{tabular}{|l|c|c|l|}
+
+\hline
+
+% The column headers:
+Device & Symbol & Value & Remark \\
+\hline
+% The next hline makes the column titles a separate rectangular box,
+% comment it out to get just a line as separator.
+%\hline
+
+\hline
+
+% Table entries start here.
+Resistor                          & R    & 100 $\Omega$     & RLC should yield audio frequencies \\
+Conductance                       & Y    & 10 mS            &                                    \\
+Capacitor                         & C    & 10 $\mu F$       &                                    \\
+Impedance                         & L    & 1 mH             &                                    \\
+Voltage controlled voltage source & U(U) & 1                & No particular use case aimed       \\
+Current controlled voltage source & U(I) & 1 $\frac{V}{A}$  & No particular use case aimed       \\
+Voltage controlled current source & I(U) & 5 $\frac{mA}{V}$ & Use case unipolar transistor       \\
+Current controlled current source & I(I) & 250              & Use case bipolar transistor        \\
+
+\hline
+
+\end{tabular}
+\caption{Device standard values}
+\label{tabDeviceStdValues}
+\end{center}
+\end{table}
+
+The hard coded standard values are chosen such that if no device values are
+specified in the netlist then the time constants of the system will
+probably be in the audio frequency range. This holds for the values of
+the four passive device kinds.
+
+The standard values for the controlled sources are more difficult to
+choose. Such sources can be used to model totally different physical
+effects and a prototypic value is hard to find. If there is a typical use
+case like the bipolar transistor simulation with a current controlled
+current source then this use-case has let to the chosen standard value.
+Because of the difficult definition of these standard values it is
+recommended not to use controlled sources in numerical evaluations with
+Octave without the explicit specification of a realistic device value in
+the netlist.
+
+All hard coded standard values of all affected devices are listed in table
+\ref{tabDeviceStdValues}.
+
+The values -- either explicitly specified or standard values - are written
+into the generated Octave script and used if the scripts are run without
+more ado. In the Octave session they can be accessed and changed. This way the
+numeric system simulation can be repeated with altered values and the
+system behavior can be investigated in dependency of device value changes
+in an empiric way. 
+
+The second return value of the generated Octave functions is a
+\code{struct}. The members have the names of the devices. Each member holds
+the value of the related device. The struct implements the parameter set
+the returned LTI object has been created from.
+
+The third return value of the generated Octave functions depends on the
+kind of result, Bode plot or full result. It is a vector of frequency
+values or time designations, respectively. Frequency values have the unit
+$\frac{rad}{s}$ as common for Octave functions. The retrieved vector is a
+suitable starting value for system simulations and can be used with the
+Octave functions \ident{bode}, \ident{step}, \ident{impulse}, etc. It
+depends on the kind of command, whether a frequency or time vector is
+required.
+
+Calling the generated function with consumption of at least one return
+value inhibits the internal behavior; no figure window is opened, no plot
+is made. Just the mentioned data is fetched if the return values are
+assigned to workspace variables. These variables can then be altered and
+reused for subsequent computations.
+
+The generated functions take a parameter set as only (optional) argument.
+In most cases, the parameter set will be the modified return value of a
+previous call of the function. Providing this argument makes the functions
+behave exactly as before but only using the altered parameters. You can
+either let them plot the standard figures (Bode plot or step response) or
+let them create a \emph{new} LTI system object based on the altered
+parameters. Please note, it is not possible to change the parameters of a
+previously created, already in the workspace existing LTI object; instead,
+you will always have to replace or overwrite it.
+
+Varying the device constants or parameters of a circuit is now completed
+with an example. Be \file{G.m} the generated Octave script:
+
+% The flushleft (table left-aligned) in conjunction with @{} (cell
+% contents without leading blanks space) ensures left-aligned appearance
+% of the M code.
+%   The \hspace* at the end of the longest M code cell enlarges the
+% distance of code and explanations.
+\begin{flushleft}
+\begin{tabular}{@{}ll}
+\verb+G+             & \% Plot the transfer or step function as defined in the circuit file \\
+\verb+[tf_G p] = G+  & \% Get an LTI object (class tf) and the default set of device constants \\
+\verb+p.R1 = 330;+   & \% Modify device constant $R_1$ in parameter set \ident{p} \\
+\verb+p.R2 = 2*p.R1+
+\hspace*{8mm}        & \% Modify device constant $R_2$ in parameter set \ident{p} \\
+\verb+G(p)+          & \% Repeat the initial plot with the altered parameter set \ident{p} \\
+\verb+tf_G = G(p)+   & \% Replace the LTI object with a new one using the altered device constants\\
+\verb+step(tf_G)+    & \% Plot the step response of the system with modified device constants \\
+\verb+bode(tf_G)+    & \% Plot the transfer function with modified device constants \\
+\verb+nyquist(tf_G)+ & \% Nyquist plot with modified device constants \\
+%\verb++ & \%  \\
+
+\end{tabular}
+\end{flushleft}
+
+
+\section{Caveats of Octave}
+
+Although generally working well, has using Octave for numerical
+post-processing some weaknesses. The author has solely used Windows
+ports of Octave which might be worse than Linux releases with respect to
+functional failures and stability. The following is stated only for the
+Windows ports of release 3.4.3 and 3.6.4 running under Windows 7.
+
+Octave 3.6.4 has general problems with the figure windows. The chosen
+graphics back-end was ``fltk''.
+\begin{itemize}
+  \item The opened figure windows are initially black. The actual plots
+    appear only after some clicking into the window pane or on the
+    buttons to enforce a redraw    
+    
+  \item If the figure window is enlarged by dragging the corners with the
+    mouse than only the frame of the window is resized, the contents stay
+    the same. This is particular annoying when MIMO systems produce grids
+    of plots; these are initially tiny but can't be enlarged
+\end{itemize}
+
+These problems let to the decision to continue with the elder release
+3.4.3. Window handling is okay in this release.
+
+With Octave 3.4.3 we get a reproducible crash when running result \code{G}
+of netlist file
+\file{bandStop.makesOctave3-4-3-win32Crash.cnl}.\footnote{The file is
+contained in the source distribution of \linnet{}.} The \linnet{}
+generated file \file{G.m} looks however unsuspiciously and resembles
+dozens of other generated files which are successfully processed. Octave
+3.6.4 and MATLAB process file \file{G.m} successfully and plot the
+expected result.

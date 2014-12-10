@@ -1,0 +1,36 @@
+/**
+ * @file badUByU.cnl
+ *   Test case for linNet.
+ * This test case proves, that a voltage controlled voltage source may
+ * have one (but only one) of its control inputs connected to one of the
+ * voltage outputs.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U       U0      K1  gnd
+
+R       R1      K1  K2
+R       R2      K2  K3
+R       R3      K3  gnd
+
+U(U)    Ubad    K3  gnd K2  K3
+
+/* Expected solution: The solution for the current out of U0 is
+   I_U0=U0/(R1+(1+k*R2)), where k is the amplification of the controlled
+   source. The voltage at K2 and K3 can easily be derived from this
+   current. R3 must not determine the voltage balance but only the current
+   distribution between resistor and controlled voltage source. */

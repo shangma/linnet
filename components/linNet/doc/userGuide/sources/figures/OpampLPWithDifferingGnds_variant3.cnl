@@ -1,0 +1,11 @@
+/* Same LP with 3rd choice of ground */
+U    Uin3  in3    null3
+
+OP   OP3   opInv3 null3  opOut3
+R    Rin3  in3    opInv3
+R    Rfb3  gnd3   opOut3
+C    C3    opInv3 gnd3
+
+DEF  Uout3 opOut3 null3
+PLOT G3    Uout3  Uin3
+PLOT Z3    Uin3   I_Uin3

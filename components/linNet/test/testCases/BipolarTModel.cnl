@@ -1,0 +1,20 @@
+U    Ubatt   vss   gnd   // 12 V
+U    Uin     in    gnd      
+C    Cin     in    B     Cin=100u
+R    R1      vss   B     R1=10k
+R    R2      B     gnd   R2=1.2k
+R    Rc      vss   C     Rc=6.8k
+R    Re      E     gnd   Re=680
+R    Rec     E     rce   Rec=68
+C    Ce      rce   gnd   Ce=4.7u
+C    Cout    C     out   Cout=1.5u
+
+/* The actual transistor model T1 */
+PI   I_base  B     b1
+U    Ube     b1    E     // 0.6 V
+I(I) beta    C     E     I_base  beta=250
+
+RES  DC      U_C   U_B   I_Ubatt I_base
+PLOT G       U_out Uin   LOG 50  10 20k
+PLOT Z       Uin   I_Uin LOG 50  10 20k
+PLOT humSupp U_out Ubatt LOG 500 10 100

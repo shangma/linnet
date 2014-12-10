@@ -1,0 +1,127 @@
+\documentclass[10pt,twoside,a4paper,openany]{report}
+\usepackage{lipsum}
+\usepackage{listings}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{appendix}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{arydshln}
+%\usepackage{ulem} % for $\xout{x}$ to strike through
+\usepackage{verbatim} % for \verbinput, see http://www.tex.ac.uk/cgi-bin/texfaq2html?label=verbfile (August 1, 2014)
+%\usepackage[table]{xcolor}
+\usepackage{paralist}
+%\usepackage{siunitx} Not available on our package server
+\usepackage{ifthen}
+
+% How to write linNet?
+\newcommand{\linnet}{lin\-Net}
+
+% Provide equation numbers to textual lemmas by \eqnum\label{myLemma}
+% http://tex.stackexchange.com/questions/114113/how-to-label-text-with-equation-number
+% as of July 23, 2014
+\makeatletter
+\newcommand{\eqnum}{\refstepcounter{equation}\textup{\tagform@{\theequation}}}
+\makeatother
+
+% Define titlepage
+\title{\linnet{} \linebreak
+       \begin{figure}[ht]
+       \centering
+       \includegraphics[]{linnet_small.jpg}
+       \end{figure} \linebreak
+       The Software for symbolic Analysis of linear Electronic Circuits \linebreak
+       Version 1.0 \linebreak
+       User Guide
+      }
+\author{Peter Vranken}
+\date{November 2014}
+
+% Place chapter name and page number in the head of each page.
+\pagestyle{headings}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks, 
+            citecolor=black,
+            filecolor=black,
+            linkcolor=black,
+            urlcolor=black,
+            bookmarksopen=false}
+
+
+% The standard page filling is unsatisfyingly. Change it.
+\textwidth160mm \textheight220mm
+\addtolength{\oddsidemargin}{-10mm}
+\addtolength{\evensidemargin}{-25mm}
+\addtolength{\topmargin}{-10mm}
+
+% TODO In the next major release use the following settings, which lead to
+% a better balanced look of the printout. However, many layout corrections
+% are needed: Tables, some figures and code fragments are to wide and at
+% least one orphan has been found.
+%\textwidth155mm \textheight210mm
+%\addtolength{\oddsidemargin}{-8mm}
+%\addtolength{\evensidemargin}{-22mm}
+%\addtolength{\topmargin}{-5mm}
+
+% Set the depth of the table of contents. The number plus 1 states the
+% largest number of dot spearated section numbers appearing in the TOC.
+% State e.g. 2 to get 1.2.3 as deepest nested section in the TOC.
+\setcounter{tocdepth}{2}
+
+% Technical terms like identifiers (object and function names) should be
+% emphasized. Place them in the ident command. Similar for file names and
+% short code snippets.
+\newcommand{\ident}[1]{\textit{#1}}
+\newcommand{\file}[1]{\textsf{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\newcommand{\bs}{\textbackslash}
+
+\begin{document}
+
+% Document development: Turn preamble of actual text blocks on or off.
+\ifthenelse{1=1}{
+% Create titlepage
+\maketitle
+
+\bigskip
+\begin{quote}
+    Copyright \copyright{} 2014  Peter Vranken, mailto:Peter\_Vranken@Yahoo.de
+    
+    Permission is granted to copy, distribute and/or modify this document
+    under the terms of the GNU Free Documentation License, Version 1.3
+    or any later version published by the Free Software Foundation;
+    with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+    A copy of the license is included in the section entitled ``GNU
+    Free Documentation License''.
+\end{quote}
+\bigskip
+
+
+\tableofcontents \phantomsection
+\listoffigures \phantomsection
+\listoftables \phantomsection
+
+%\input{references}
+\input{abbrev}
+}
+
+\input{introduction}
+\input{installation}
+\input{cmdLine}
+\input{syntaxOfNetlist}
+\input{modellingDevices}
+\input{buildingLinNet}
+\input{octaveInterface}
+\input{useCases}
+
+\appendix
+\appendixpage
+\addappheadtotoc
+\input{BNF-cnl}
+\input{math}
+\input{simBipolarTModel}
+\input{GNUFreeDocumentationLicense}
+
+\end{document}

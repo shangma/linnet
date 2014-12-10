@@ -1,0 +1,30 @@
+/**
+ * @file badUByU.cnl
+ *   Test case for linNet.
+ * This test case proves, that a voltage controlled voltage source, which
+ * specifies the same node pair for voltage injection and for control,
+ * leads to a proper error feedback: The LES will contain linear dependent
+ * equations.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U       U0      K2  gnd
+
+R       R1      K1  K2
+R       R2      K2  gnd
+
+U(U)    Ubad    K2  gnd K2  gnd

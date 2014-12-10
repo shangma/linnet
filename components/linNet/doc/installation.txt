@@ -1,0 +1,18 @@
+* Installation of linNet
+
+To install linNet copy the appropriate folder
+linNet/bin/<system>/[DEBUG|PRODUCTION] with the pre-compiled executable
+binary to a location of your choice. The folder to copy is one out of
+those, which contain the linNet executable and the folder private with
+application resources. The DEBUG compilations are suggested.
+
+The path to the installation location should not contain any blanks.
+
+Add the variable LINNET_HOME to your system environment. The value of this
+variable is the name and path of the copied folder.
+
+Add the name and path of the copied folder to the system PATH variable.
+
+To test the installation 
+For additional information please refer to the manual, file
+linNet/doc/userGuide/linNet-userGuide.pdf.

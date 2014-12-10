@@ -1,0 +1,37 @@
+/**
+ * @file inverseTF.cnl
+ *   Test case for linNet.
+ * This test case demonstrates the idea of an inverse transfer function.
+ * The "normal" and the inverse TF are presented as Bode plot; the latter
+ * should be the same curve but mirrored at the horizontal 0 dB line.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U   U1  in  gnd
+OP  OP1 op1 gnd op_q
+R   R   in  op1 
+R   RT1 op1 p1, RT1=R
+C   CT1 op1 p1
+R   RT2 p1  p2, RT2 = R
+C   CT2 p1  p2
+R   RU  p2  op_q, RU = R
+
+/* The normal transfer function as Bode plot. */
+PLOT    G       U_op_q  U1
+
+/* The inverse transfer function. */     
+PLOT    G_inv   U1      U_op_q

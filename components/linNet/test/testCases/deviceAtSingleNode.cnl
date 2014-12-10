@@ -1,0 +1,116 @@
+/**
+ * @file deviceAtSingleNode.cnl
+ *   Test case for linNet.
+ * This test case proves, that devices connected at both ends to the same
+ * node are handled properly.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U Uin in gnd
+
+/* The next devices are useless but harmless. They lead to
+   self-elimination in the matric coeffiecients when setting up the LES and
+   don't appear in the result. (Besides that Icycle is reported as input
+   quantity with null effect.) */
+R Rcyclic in in
+C Ccyclic gnd gnd
+I Icycle in in
+
+/* The next device is well defined and handled properly. A controlled
+   current of null cycles in a circle. As currents through a controlled
+   source are not a calculated unknown of the system this has no apparemt
+   impact on the reported result. On could put a current probe in series
+   to prove that the cyclic current is indeed null. */
+I(U) k_u2i in in in in
+
+/* Harmless and handled properly. A controlled current cycles in a circle.
+   As currents through a controlled source are not a calculated unknown of
+   the system this has no apparent impact on the reported result. On could
+   put a current probe in series to prove that the cyclic current has
+   the expected value k2_u2i*Uin. */
+I(U) k2_u2i in in in gnd
+
+/* Harmless and handled properly. A controlled current of null flows from
+   in to gnd. As currents through a controlled source are not a calculated
+   unknown of the system this has no apparent impact on the reported
+   result. On could put a current probe in series to prove that the
+   current is indeed null. */
+I(U) k3_u2i in in in in
+
+/* The next elements of the netlist introduce errors and the test has to
+   prove that they are recognized and reported properly. As this is
+   possible only for one error at a time all of these cases are commented
+   out. Remove the comment delimiters only for one group of device at a
+   time in order to run that test case. These test cases can't be merged,
+   it would introduce other problems like name clashes, which are out of
+   scope of the considerations here. */
+
+/* The next pair of devices introduces linear dependent equations and no
+   solution is available. This is correct and handled and reported
+   properly. */
+//OP OPbad in in out
+//R Rfb out in
+
+/* The next device leads to a contradictory equation, Uin-Uin=Ubad, or
+   0=Ubad. This is recognized and reported properly. */
+//U Ubad in in
+
+/* The next device leads to a dependent equation. This is recognized and
+   reported properly. */
+//U(U) Unull in in in in
+
+/* The next device leads to a contradictory equation, Uin = 0. This is
+   recognized and reported properly. */
+//U(U) Unull in gnd in in
+
+/* The current in the probe is undefined, which introduces a dependent
+   quantity. This is recognized and reported properly. */
+//PI null in in
+
+/* The next triple of devices introduces a contradictory condition. This
+   is recognized and reported properly. */
+//R Rload in k1
+//PI ctrl k1 gnd
+//U(I) Ubad in in ctrl
+
+/* The next triple of devices leads to a correct. The cyclic current I_k
+   is defined and known (k*Uin/Rload) but is neither computed nor
+   reported. Due to the cycle connection it eliminates itself in the
+   coefficient when setting up the LES. In general, the current through
+   controlled current sources is not a reported unknown of the system; if
+   it is of any interest one needs to put a current probe in series. */
+//R Rload in k1
+//PI ctrl k1 gnd
+//I(I) k in in ctrl
+
+/* An open end of a current source leads to a contradictory equation. This
+   is recognized and reported properly. */
+//I Iopen in k_nowhereElseInUse
+
+/* An open end of a null current source leads to a dependent equation. This
+   is recognized and reported properly. */
+//I(U) k4_u2i in k_nowhereElseInUse in in
+
+/* An open end of a current source leads to a contradictory equation. This
+   is recognized and reported properly. */
+//I(U) k4_u2i in k_nowhereElseInUse in gnd
+
+/* An open end of a current source leads to a contradictory equation. This
+   is recognized and reported properly. */
+//R Rload in k1
+//PI ctrl k1 gnd
+//I(I) k_i2i in k_nowhereElseInUse ctrl

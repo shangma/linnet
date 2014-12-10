@@ -1,0 +1,45 @@
+/**
+ * @file recursiveVoltageDef.cnl
+ *   Test case for linNet.
+ * This test case proves that recursive voltage definitions lead to proper
+ * error feedback: DEF must only combine node potentials but not refer to
+ * previously defined user-voltages.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U U1    in  gnd
+R R1    in  K1
+R R2    K1  gnd
+
+DEF Uout    K1 gnd
+DEF Uloss   in K1
+
+/* linNet behaves well with this example but the error recognized here is
+   misleadingly reported:
+     ERROR - Node Uout is referenced for voltage sensing but it is not a
+   true network node and only true network nodes can be referenced for
+   voltage sensing; such nodes are connected to at least one device
+     ERROR - The user defined voltage Ubad1 references invalid nodes.
+   Please refer to previous messages for details
+     "Voltage sensing" refers to the use of this check for current probes
+   or controlled sources and needs to be extended to this use case.
+     "references invalid nodes" is too narrow; here, we don't reference
+   any node. Put it more general and it's okay, like "reference to node is
+   invalid" or "this is not a valid node reference". */
+DEF Ubad1   in Uout
+DEF Ubad2   Uout in
+DEF Ubad3   Uout Uloss

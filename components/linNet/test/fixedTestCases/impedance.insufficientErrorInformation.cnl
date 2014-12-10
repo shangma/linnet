@@ -1,0 +1,47 @@
+/**
+ * @file impedance.cnl
+ *   Sample netlist file for linNet. Used for chapter "Use cases" to
+ * demonstrate in- and output impedance computation.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U Uin K1 gnd
+DEF Uout K2 gnd
+
+PLOT G   Uout Uin
+RES  Zin Uin I_Uin
+
+I Iload K2 gnd
+RES  Zout Uout Iload
+
+C C  K1 K2
+R Rc K1 K2
+L L  K2 gnd
+R Rl K2 gnd
+
+/* This ciruit just yields the output:
+Sep 02 17:32:40 2014 - 000050 ms - RESULT - Reading circuit file C:\user\vranken\projects\linNet\trunk\components\linNet\test\failingTestCases\impedance.insufficientErrorInformation.cnl successfully done
+Sep 02 17:32:40 2014 - 000050 ms - RESULT - User-defined result G (Bode plot):
+The dependency of Uout on Uin:
+  Uout(s) = N_Uout_Uin(s)/D_Uout_Uin(s) * Uin(s), with
+    N_Uout_Uin(s) = Rc*Rl*L*C * s^2
+                    +Rl*L * s
+    D_Uout_Uin(s) = Rc*Rl*L*C * s^2
+                    +(Rc*L + Rl*L) * s
+                    +Rc*Rl
+Sep 02 17:32:40 2014 - 000074 ms -  ERROR - User-defined result Zin can't be computed due to previous errors
+Sep 02 17:32:40 2014 - 000074 ms -  ERROR - User-defined result Zout can't be computed due to previous errors */

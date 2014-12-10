@@ -1,0 +1,9 @@
+U1      k3  out
+U2      out gnd
+
+OP      k1  k2  out
+R3      out k2
+R4      k2  gnd
+
+R1      k3  k1
+R2      k1  gnd

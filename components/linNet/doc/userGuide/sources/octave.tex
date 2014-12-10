@@ -1,0 +1,19 @@
+Issues with Octave:
+
+Black window at the beginning, need to click with mouse
+
+Bode plots are supported for SISO systems only. A splitted graphics with
+a matrix of plots of all the crosswise transfer functions is not
+implemented.
+
+Use case 1, Transfer function: 
+
+The step response of system SIMO can't plotted as the current I_OP1 has a
+numerator with higher power in s than the denominator. There's a current
+impulse in the step response (needed to instantaneously load the two
+capacitors). Such system's can't be simulated in the time domain and thus
+no step response can be plotted. This limitation is acceptable but the
+feedback the user gets isn't. Octave simply says: "error: tf: tf2ss:
+system must be proper" In comparison to this, MATLAB says: "Cannot
+simulate the time response of LTI models with more zeros than poles." The
+latter is to the point and meaningful.

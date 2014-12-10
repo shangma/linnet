@@ -1,0 +1,19 @@
+\chapter{Listing of Octave LTI Simulation}
+\label{secListingOctaveSimulation}
+
+Here is the listing of an Octave script that can be used to run the LTI
+system generated from the bipolar transistor model. In section
+\ref{secTModelOpLimits} this script has been used to find the limits of
+the linear simulation; with other words the operating range of the
+linear solution \linnet{} had figured out. Outside this range the found
+solution will no longer show the behavior of the true circuit.
+
+To run the script you need to copy it into the same folder, where
+\linnet{} generated the user-defined result \ident{DC}, i.e. where the
+script \file{DC.m} is located.
+
+%\verbatiminput{BipolarTModel_opRangeByLsim.m}
+
+\lstinputlisting[ %language=Octave,
+caption={Time domain simulation of bipolar transistor model},
+captionpos=b,label=lstSimBipolarTModel]{BipolarTModel_opRangeByLsim.m}

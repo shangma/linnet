@@ -1,0 +1,164 @@
+\chapter{The Command Line Interface}
+
+\linnet{} is a simple console application. It is fully controlled by the
+command line arguments and all its output is text based, either printed
+to the console or written into the output files.
+
+All interaction with \linnet{} is done from a shell window. From such a
+window type \code{linNet --help} to get a short reminder on the available
+command line options.
+
+The command line may contain program options and the names of the input
+files, which are always circuit netlist files. The order of options and
+file names doesn't matter but usually all the file names are placed behind
+all the options. If a file name could be mixed up with an option then the
+double hyphen (\code{--}) can be placed on the command line: All remaining
+command line arguments are considered file names regardless of how they
+look like.
+
+Circuit netlist files are named \code{*.cnl} by convention but they may
+follow any other name pattern. Only the file name extension \code{*.ckt}
+is reserved and must not be used.
+
+All the information that impacts the conducted computations is placed in
+the circuit netlist files; the program options only affect the generated
+output. The verbositiy of the console output can be controlled, a log file
+can be created and the output for Octave is an option only. The command
+line arguments in detail:
+\begin{itemize}
+  \item \emph{-h, --help}
+    \linnet{} prints a short help text and terminates again. The return
+    value to the shell is 0. Can be combined with \code{-r}
+  \item \emph{-r, --version}
+    \linnet{} prints the software revision and terminates again. The
+    return value to the shell is 0. Can be combined with \code{-h}
+  \item \emph{-v LEVEL, --verbosity=LEVEL}
+    The verbosity LEVEL of the application; LEVEL is an enumeration value.
+    It doesn't matter whether it is written in upper or lower case
+    characters. The blank between \mbox{-v} and LEVEL is optional. LEVEL
+    applies in the same way to the console output and the application log
+    file. In general, the same information is written to both of these
+    streams. LEVEL is one out of:
+    \begin{itemize}
+      \item \code{DEBUG}: A lot of internal information about the progress
+        of the computation is printed to the console. Among more, the
+        linear equation system is printed prior to and after running the
+        solver. For complex circuits this can mean many thousand lines of
+        output or much time to wait.
+        
+        A strong recommendation is to use this level of verbosity solely
+        in conjunction with the other option \code{-s}, which suppresses
+        all console output. (Writing to the log file only is times faster
+        then writing to the console)
+        
+      \item \code{INFO}: Some progress information is printed. Among more,
+        the algebraic solution of the linear equation system is printed,
+        which can still mean bulky output. Use this level of verbosity
+        with care 
+        
+      \item \code{RESULT}: This is the default level of verbosity. All
+        final results are printed, i.e. the requested variables in the
+        frequency domain.
+        
+        Additionally, if a concise log format is chosen (see \code{-f}),
+        which doesn't have time stamps, then \code{RESULT} will also print
+        some timing information.
+        
+      \item \code{WARN}: The warnings are printed. Computation results can
+        be found only exported as Octave code (see~\code{-o})
+        
+      \item \code{ERROR} The error messages are printed. Computation
+        results can be found only exported as Octave code (see~\code{-o})
+        
+      \item \code{FATAL}: Only the fatal error messages are printed. Fatal
+        errors (as opposed to the ``normal'' errors) are those, which lead
+        to immediate (but still controlled) program termination; the
+        out-of-memory error is a prominent example. Computation results --
+        if any -- can be found only exported as Octave code (see~\code{-o})
+    \end{itemize}
+    Default is \code{RESULT}. Any verbosity level includes all output of
+    the less verbose levels.
+
+  \item \emph{-f FORMAT, --format-of-log-entry=FORMAT}
+    Log entry format. FORMAT is an enumeration value. It doesn't matter
+    whether it is written in upper or lower case characters. The blank
+    between -f and FORMAT is optional. FORMAT is one out of:
+    \begin{itemize}
+      \item \code{raw}: Only the pure message text is printed to the
+        console and the log file
+        
+      \item \code{short}: Each message is preceeded by a short line
+        header, which contains the consumed CPU time and the severeness of
+        the message
+        
+      \item \code{long}: Each message is preceeded by a line header, which
+        contains a time stamp, the consumed CPU time and the severeness of
+        the message.
+    \end{itemize}
+    The default format is \code{long}
+
+  \item \emph{-s, --silent}
+    Silent operation, only a greeting is emitted. Do not write progress
+    information to the console, only write into the log file. To avoid
+    useless runs of the application it is not allowed to choose silent
+    operation if no log file is in use (see~\code{-l})
+    
+  \item \emph{-l[FILENAME], --log-file-name[=FILENAME]}
+    This option enables the use of a log file and controls its name. No
+    log file is opened if this option is not used.
+    
+    You may state the name of the log file but normally you won't: If the
+    option is used without argument \code{FILENAME} then an appropriate
+    file name is chosen by the application. It is derived from the name of
+    the circuit netlist if a single input file is given and otherwise a
+    generic name is chosen.
+    
+    There's a constraint: Either using a log file is specified with
+    \code~{-l} or~\code{-s} (or \code{--silent}) is not given 
+    
+  \item \emph{-c, --clear-log-file}
+    Clear the log file at the beginning of operation. Default is to append
+    to a possibly already existing log file
+    
+  \item \emph{-o[DIRNAME], --Octave-output-directory[=DIRNAME]}
+    This option enables the generation of Octave script code and controls
+    the location. No Octave code is generated if this option is not used.
+
+    Octave code generated from a circuit netlist will be placed into a
+    folder whose name is derived from the netlist file. As many output
+    folders will be created as input files are given. All of these folders
+    will be placed into a common parent directory and this directory is
+    designated by \code{DIRNAME}. If \code{DIRNAME} is omitted then the
+    current working directory is used as common parent directory
+
+  \item \emph{-i, --do-not-copy-common-Octave-code}
+    The generated Octave code builds on some common scripts, which are
+    normally copied into each of the netlist related output folders. This
+    way the generated code will run just like that in Octave, without the
+    need of manipulating Octave's search path. If you dislike the over and
+    over copied, always identical files you can consider to install them
+    once in your Octave environment and to let them no longer be produced
+    by \linnet{}.
+    
+    If you give this option then copying the common files into each output
+    folder is simply not done.
+    
+    This switch is relevant only if \code{-o} is also given
+
+\end{itemize}
+
+If the command line parser detects a problem then it tends to print the
+help text for convenience. This is done into stdout. The concrete error
+report is however printed into stderr. It depends on your shell in which
+fashion these two text streams are separated (or interchanged). Carefully
+look for the actual error message; if you are lucky it's presented in a
+different color.
+
+If \linnet{} is integrated in a scripting environment then its return
+value may matter. Normally, \linnet{} returns 0 to the calling shell. If
+the command line parser recognizes an error or if any input file can't be
+opened or if it causes a computational error then \linnet{} returns -1.
+The error cause cannot be concluded from the return value, the log file
+needs to be inspected to find out.
+
+

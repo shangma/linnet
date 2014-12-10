@@ -1,0 +1,40 @@
+/**
+ * @file bandStop.makesOctave3-4-3-win32Crash.cnl
+ *   Test case for linNet.\n
+ * A band-stop filter, which can be computed by linNet and which can be
+ * numerically computed by Octave 3.6.4 on Windows and MATLAB but which
+ * makes Octave 3.4.3 on Windows crash.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// Definition of in- and output voltage.
+U   U1 K1 K6_gnd
+DEF U2 K5 K6_gnd
+PLOT G U2 U1
+
+C C   K1 K2
+R R1  K1 K4
+R R2  K2 K7
+R R3  K2 K6_gnd
+
+R R12 K3 K5  R12=R1
+R R13 K4 K5  R13=R1
+R R31 K1 K2  R31=R3
+C C1  K7 K3  C1=C
+
+OP OP1 K2 K3 K5
+OP OP2 K3 K4 K7

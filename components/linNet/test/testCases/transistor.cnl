@@ -1,0 +1,34 @@
+/* A transistor is modelled by a current controlled current source and a
+   constant voltage, that models the (nearly constant) basis emitter
+   voltage drop. */
+
+U Ubatt ubatt gnd
+U Uin in gnd
+
+// The DC-decoupling input capacitor.
+C Cin in basis  Cin = 4.7u
+
+// The four resistors that define the operation point of the transistor.
+R R2 basis gnd  R2 = 1k
+R R1 ubatt basis  R1 = 100k
+R R4 emitter gnd  R4 = 100
+R R3 ubatt collector  R3 = 2k
+
+// The transistor with current amplification B.
+// The current trough the basis-emitter path is sensed.
+PI probeIb basis basisInternal
+U Ube basisInternal emitter
+I(I) B emitter collector probeIb  B=200
+
+// The output is the voltage at the collector, but decoupled with a second capacitor.
+C Cout collector out Cout = 4.7u
+DEF Uout out gnd
+
+// Plot the input impedance.
+PLOT Z Uin I_Uin
+
+// Plot the transfer characteristics.
+PLOT G Uout Uin
+
+// Compute the current consumption from the power supply.
+RES Isupply I_Ubatt
