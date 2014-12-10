@@ -3,7 +3,8 @@
 linNet is an application to compute the transfer function of linear,
 electronic circuits. The computation is done symbolically, not
 numerically, and the result is a formula rather than a number or a series
-of such.
+of such. The found formula is the Laplace transform of the dependencies of the
+voltages and currents in the circuit on the input voltages and currents.
 
 A linear electronic circuit is a combination of the supported basic
 devices as listed in the table below. The circuit is input to linNet. The
@@ -11,8 +12,9 @@ representation of the circuit is a list of devices with connectivity
 information. The interconnections are expressed by references to nodes,
 where a node is a point of the circuit, which normally at least two
 devices are connected to. This leads to a simple formal syntax, the
-circuit network list. This list can be created and maintained with a text
-editor; there's no graphical interface for editing a circuit.
+circuit network list or simply netlist. This list can be created and
+maintained with a text editor; there's no graphical interface for editing
+a circuit.
 
 <wiki:comment>
 \begin{figure}
@@ -27,6 +29,22 @@ The computed formulas are printed to the console and to the application
 log file and can be used for further investigation or for publications or
 didactic purpose.
 
+|| Device                               || ID         ||
+|| Resistor                             || {{{R}}}    ||
+|| Conductance                          || {{{Y}}}    ||
+|| Capacitor                            || {{{C}}}    ||
+|| Inductivity                          || {{{L}}}    ||
+|| Ideal operational amplifier (op-amp) || {{{OP}}}   ||
+|| Constant voltage source              || {{{U}}}    ||
+|| Voltage controlled voltage source    || {{{U(U)}}} ||
+|| Current controlled voltage source    || {{{U(I)}}} ||
+|| Constant current source               || {{{I}}}    ||
+|| Voltage controlled current source    || {{{I(U)}}} ||
+|| Current controlled current source    || {{{I(I)}}} ||
+|| Current probe (wire)                 || {{{PI}}}   ||
+
+_Table 1: Supported linear devices_
+
 To make the application somewhat more attractive it exports the computed
 formulas as Octave or MATLAB script code, too. Numeric evaluation becomes
 a simple one-line command in Octave. The formulas are exported as LTI
@@ -36,15 +54,17 @@ reaches from simple transfer function plotting to stability analyses and
 system response computation on arbitrary system input.
 
 <wiki:comment>
-Figure URLs just like that to show the picture doesn't work. Using the image in a link from the text at least enables the user to get the imgae on mouse click. Ugly work around.
+Figure URLs just like that to show the picture doesn't work. Using the image in a link from the text at least enables the user to get the image on mouse click. Ugly work around.
 </wiki:comment>
 
-http://code.google.com/p/linnet/source/browse/wiki/trunk/frontPage/FirstIntroExample.png
+https://linnet.googlecode.com/svn/wiki/trunk/frontPage/FirstIntroExample.jpg
 
-Please refer to figure [http://code.google.com/p/linnet/source/browse/wiki/trunk/frontPage/FirstIntroExample.png FirstIntroExample.png] as an example
-of how linNet works. This is a simple RLC element with a transfer
-function of second order. It can be represented by the following circuit
-netlist:
+_Figure 1: Simple example of a linear electronic circuit_
+
+Please refer to figure 1 as an example of how linNet works. This is a
+simple RLC element with a transfer function of second order. It can be
+represented by the following circuit netlist:
+
 {{{
 U Uin in  gnd
 L L   in  K1
@@ -70,27 +90,21 @@ The dependency of U_out on U_in:
                       +1
 }}}
 
-Supported linear devices:
-|| Device                               || ID         ||
-|| Resistor                             || {{{R}}}    ||
-|| Conductance                          || {{{Y}}}    ||
-|| Capacitor                            || {{{C}}}    ||
-|| Inductivity                          || {{{L}}}    ||
-|| Ideal operational amplifier (op-amp) || {{{OP}}}   ||
-|| Constant voltage source              || {{{U}}}    ||
-|| Voltage controlled voltage source    || {{{U(U)}}} ||
-|| Current controlled voltage source    || {{{U(I)}}} ||
-|| Constant current soure               || {{{I}}}    ||
-|| Voltage controlled current source    || {{{I(U)}}} ||
-|| Current controlled current source    || {{{I(I)}}} ||
-|| Current probe (wire)                 || {{{PI}}}   ||
-
-http://code.google.com/p/linnet/source/browse/wiki/trunk/frontPage/FirstIntroExample_OctaveOutput.jpg
-
 Going to Octave and typing {{{G}}} to plot the transfer function (still
-using default device values) gives us figure
-[http://code.google.com/p/linnet/source/browse/wiki/trunk/frontPage/FirstIntroExample_OctaveOutput.jpg FirstIntroExample_OctaveOutput.jpg]. More plots or plots with altered
-device values are a matter of single commands in Octave.
+using default device values) gives us figure 2. More plots or plots with
+altered device values are a matter of single commands in Octave.
+
+https://linnet.googlecode.com/svn/wiki/trunk/frontPage/FirstIntroExample_OctaveOutput.jpg
+
+_Figure 2: Octave plot of transfer function of the above circuit_
+
+You will find the details of the usage of linNet, in particular
+installation, netlist syntax and Octave interface and an explanation of
+the mathematical concept of the software in the user guide. Please use the
+external links on the upper left hand side of this window to download the
+user guide. The download of the ready-to-use, pre-compiled software (so far
+Windows only) with or without source files can be found there as further
+links.
 
 linNet means "linear network". It founds on a symbolic solver for
 linear equation systems. There's no way to model any non linear effects
