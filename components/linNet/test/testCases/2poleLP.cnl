@@ -1,0 +1,58 @@
+/**
+ * @file 2poleLP.cnl
+ *   Test case for linNet.
+ * This test case proves the correct computation of a low pass filter with
+ * two poles. The inverting op-amp configuration is used with a single
+ * resistor in the input (= constant input impedance) and two RC elements
+ * in series with a resitor in the feedback line. All resistors are chosen
+ * identical so that the amplification begins with 3 with DC operation and
+ * falls to 2 and 1 when the corner frequencies of the RC elements are
+ * reached (or 9.5, 6, 0 dB, respectively). The capacitors are chosen such
+ * that these corner frequencies are different enough to see the steps in
+ * the Bode plot. The correct behavior is proven in the Bode plot.
+ *
+ * Copyright (C) 1991, 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U   U1  IN  GND
+DEF U2  OPQ GND
+
+OP  OP  OP1 GND OPQ
+
+R   R   IN  OP1 R = .159155  /* Setting R=1/(2*pi) makes the corner
+                                frequencies the reciprocal of the capacitance. */
+                             
+R   Rt1 OP1 P1  Rt1 = R      /* First time constant: Rt1 and Ct1 in parallel. */
+C   Ct1 OP1 P1a Ct1 = 10m    /* f=100Hz */
+PI  I_Ct1 P1a P1             /* Test: Measure the current through the capacitor. */
+                             
+R   Rt2   P1  P2  Rt2 = R      /* Second time constant. */
+C   Ct2   P1  P2a Ct2 = 100u   /* f=10KHz  */
+PI  I_Ct2 P2a P2               /* Test: Measure the current through the capacitor. */
+
+R   Ru  P2  OPQ Ru = R       /* The last resistance doesn't have a parallel
+                                capacitance and defines the amplification for
+                                limit f to infinite. */
+
+PLOT G U2 U1 LOG 40 10. 100k /* Default settings for the Bode plot of the
+                                transfer function is to plot 4 decades so that
+                                all steps become visible. */
+
+DEF  U_Ct1 OP1   P1a         /* Test: Dependency of U(I) at capacitor Ct1 should yield */
+PLOT Z_Ct1 U_Ct1 I_Ct1       /* the known complex impedance 1/(sCt1). */
+
+DEF  U_Ct2 P1    P2a         /* Test: Dependency of U(I) at capacitor Ct2 should yield */
+PLOT Z_Ct2 U_Ct2 I_Ct2       /* the known complex impedance 1/(sCt2). */
