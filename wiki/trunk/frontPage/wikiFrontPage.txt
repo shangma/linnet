@@ -16,20 +16,11 @@ circuit network list or simply netlist. This list can be created and
 maintained with a text editor; there's no graphical interface for editing
 a circuit.
 
-<wiki:comment>
-\begin{figure}
-\centering
-\includegraphics[width=5.29cm]{FirstIntroExample}
-\caption{Simple example of a linear electronic circuit}
-\label{figFirstIntroExample}
-\end{figure}
-</wiki:comment>
-
 The computed formulas are printed to the console and to the application
 log file and can be used for further investigation or for publications or
 didactic purpose.
 
-|| Device                               || ID         ||
+|| Device                               || Symbol     ||
 || Resistor                             || {{{R}}}    ||
 || Conductance                          || {{{Y}}}    ||
 || Capacitor                            || {{{C}}}    ||
@@ -38,7 +29,7 @@ didactic purpose.
 || Constant voltage source              || {{{U}}}    ||
 || Voltage controlled voltage source    || {{{U(U)}}} ||
 || Current controlled voltage source    || {{{U(I)}}} ||
-|| Constant current source               || {{{I}}}    ||
+|| Constant current source              || {{{I}}}    ||
 || Voltage controlled current source    || {{{I(U)}}} ||
 || Current controlled current source    || {{{I(I)}}} ||
 || Current probe (wire)                 || {{{PI}}}   ||
@@ -52,10 +43,6 @@ transfer function objects so that the complete set of analysis functions
 from the Octave control toolbox can be applied just like that. This
 reaches from simple transfer function plotting to stability analyses and
 system response computation on arbitrary system input.
-
-<wiki:comment>
-Figure URLs just like that to show the picture doesn't work. Using the image in a link from the text at least enables the user to get the image on mouse click. Ugly work around.
-</wiki:comment>
 
 https://linnet.googlecode.com/svn/wiki/trunk/frontPage/FirstIntroExample.jpg
 
