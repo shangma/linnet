@@ -1,0 +1,59 @@
+Dec 13 15:23:58 2014 - 000025 ms - RESULT - 
+-----------------------------------------------------------------------------
+ linNet - The Software for symbolic Analysis of linear Electronic Circuits
+ Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ This is free software; see the source for copying conditions. There is NO
+ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-----------------------------------------------------------------------------
+Dec 13 15:23:58 2014 - 000028 ms - RESULT - Reading circuit file wire10.cnl successfully done
+Dec 14 04:37:35 2014 - 47616536 ms - RESULT - User-defined result G (Bode plot):
+The dependency of U2 on U1:
+  U2(s) = N_U2_U1(s)/D_U2_U1(s) * U1(s), with
+    N_U2_U1(s) = Rl
+    D_U2_U1(s) = Rl*L^10*C^10 * s^20
+                 +(Rl^2*L^9*C^10 + L^10*C^9) * s^19
+                 +20*Rl*L^9*C^9 * s^18
+                 +(18*Rl^2*L^8*C^9 + 18*L^9*C^8) * s^17
+                 +170*Rl*L^8*C^8 * s^16
+                 +(136*Rl^2*L^7*C^8 + 136*L^8*C^7) * s^15
+                 +800*Rl*L^7*C^7 * s^14
+                 +(560*Rl^2*L^6*C^7 + 560*L^7*C^6) * s^13
+                 +2275*Rl*L^6*C^6 * s^12
+                 +(1365*Rl^2*L^5*C^6 + 1365*L^6*C^5) * s^11
+                 +4004*Rl*L^5*C^5 * s^10
+                 +(2002*Rl^2*L^4*C^5 + 2002*L^5*C^4) * s^9
+                 +4290*Rl*L^4*C^4 * s^8
+                 +(1716*Rl^2*L^3*C^4 + 1716*L^4*C^3) * s^7
+                 +2640*Rl*L^3*C^3 * s^6
+                 +(792*Rl^2*L^2*C^3 + 792*L^3*C^2) * s^5
+                 +825*Rl*L^2*C^2 * s^4
+                 +(165*Rl^2*L*C^2 + 165*L^2*C) * s^3
+                 +100*Rl*L*C * s^2
+                 +(10*Rl^2*C + 10*L) * s
+                 +2*Rl
+Dec 14 04:37:35 2014 - 47616567 ms -  ERROR - Can't copy template folder C:\user\vranken\projects\linNet\trunk\components\linNet\bin\win32\PRODUCTION\private with Octave code to the aimed target location .\wire10. The generated Octave scripts won't be usable. Please check for conflicting file and folder names and check access rights
+Dec 14 04:37:35 2014 - 47616603 ms - RESULT - User-defined result G_I (Bode plot):
+The dependency of I_Rl on I_U1:
+  I_Rl(s) = N_I_Rl_I_U1(s)/D_I_Rl_I_U1(s) * I_U1(s), with
+    N_I_Rl_I_U1(s) = 1
+    D_I_Rl_I_U1(s) = L^10*C^10 * s^20
+                     +Rl*L^9*C^10 * s^19
+                     +19*L^9*C^9 * s^18
+                     +18*Rl*L^8*C^9 * s^17
+                     +153*L^8*C^8 * s^16
+                     +136*Rl*L^7*C^8 * s^15
+                     +680*L^7*C^7 * s^14
+                     +560*Rl*L^6*C^7 * s^13
+                     +1820*L^6*C^6 * s^12
+                     +1365*Rl*L^5*C^6 * s^11
+                     +3003*L^5*C^5 * s^10
+                     +2002*Rl*L^4*C^5 * s^9
+                     +3003*L^4*C^4 * s^8
+                     +1716*Rl*L^3*C^4 * s^7
+                     +1716*L^3*C^3 * s^6
+                     +792*Rl*L^2*C^3 * s^5
+                     +495*L^2*C^2 * s^4
+                     +165*Rl*L*C^2 * s^3
+                     +55*L*C * s^2
+                     +10*Rl*C * s
+                     +1
