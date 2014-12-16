@@ -1,0 +1,70 @@
+/**
+ * @file wire9.cnl
+ *   This circuit implements a simple model of an electric wire. The wire
+ * is modelled as n identical elements, where each element is a serial
+ * inductivity and a parallel capacitance. n=7 is the greatest n with
+ * negligible computation time and n=10 is the greatest n, which has been
+ * computed, but n=4 is unfortunately the greatest n, which can be handled
+ * numerically by Octave 3.8 (elder revisions are worse). MATLAB doesn't
+ * have this limitation. It still shows reasonable results for the higher
+ * n.\n
+ *   The step response of the system shows a stepwise increase of the
+ * output voltage till the final value of half the input voltage is
+ * reached. The greater n the clearer this pattern becomes.\n
+ *   n=9
+ *
+ * Caution: The computation of this circuit takes about half an hour.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U   U1    I  GND
+DEF U2    O  GND
+
+PI  I_Rl  O  Oa
+R   Rl    Oa GND  /* Terminating resistance */
+R   Ri    I  K1   Ri=Rl
+
+C   C     K1 GND
+L   L     K1 K2
+
+C   C2    K2 GND  C2=C
+L   L2    K2 K3   L2=L
+
+C   C3    K3 GND  C3=C
+L   L3    K3 K4   L3=L
+
+C   C4    K4 GND  C4=C
+L   L4    K4 K5   L4=L
+
+C   C5    K5 GND  C5=C
+L   L5    K5 K6   L5=L
+
+C   C6    K6 GND  C6=C
+L   L6    K6 K7   L6=L
+
+C   C7    K7 GND  C7=C
+L   L7    K7 K8   L7=L
+
+C   C8    K8 GND  C8=C
+L   L8    K8 K9   L8=L
+
+C   C9    K9 GND  C9=C
+L   L9    K9 O    L9=L
+
+PLOT G    U2    U1
+PLOT G_I  I_Rl  I_U1  
+

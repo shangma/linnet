@@ -12,7 +12,7 @@
  * enough to see the steps in the Bode plot. The correct behavior is
  * proven in the Bode plot.
  *
- * Copyright (C) 1991, 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
