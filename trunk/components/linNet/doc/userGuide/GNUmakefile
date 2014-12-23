@@ -26,23 +26,28 @@
 # the command line of make.
 doc ?= linNet-userGuide
 
-# General settings for the makefile.
-#$(info Makeprocessor in use is $(MAKE))
-SHELL := cmd
-.SHELLFLAGS := /c
+# Include the required sub-makefiles.
+sharedMakefilePath := ../../../shared/makefile/
+include $(sharedMakefilePath)operatingSystem.mk
 
-texFlags := -halt-on-error -c-style-errors -synctex=1 -time-statistics -max-print-line=255
 
 # The list of include paths to be considered.
-includeDirs := sources sources\figures sources\templates
-texFlags += $(foreach dir,$(includeDirs),-include-directory=$(dir))
+ifeq ($(OS),Windows_NT)
+   includeDirs := sources sources/figures sources/templates
+   texFlags := -halt-on-error -c-style-errors -synctex=1 -time-statistics -max-print-line=255
+   texFlags += $(foreach dir,$(includeDirs),-include-directory=$(dir))
+else
+   TEXINPUTS := /usr/share/texlive//:.//:sources:sources/figures:sources/templates
+   export TEXINPUTS
+   texFlags := -halt-on-error -synctex=1
+endif
 
 .PHONY: $(doc).pdf
 $(doc).pdf:
 	$(info Compiling $(@:.pdf=.tex))
-	pdflatex.exe $(texFlags) $(@:.pdf=.tex)
-	pdflatex.exe $(texFlags) $(@:.pdf=.tex)
-	pdflatex.exe $(texFlags) $(@:.pdf=.tex)
+	pdflatex $(texFlags) $(@:.pdf=.tex)
+	pdflatex $(texFlags) $(@:.pdf=.tex)
+	pdflatex $(texFlags) $(@:.pdf=.tex)
 	del $(doc).aux > nul 2> nul
 	del $(doc).out > nul 2> nul
 	del $(doc).toc > nul 2> nul
@@ -54,7 +59,7 @@ $(doc).pdf:
 .PHONY: onePass
 onePass:
 	$(info Compiling one pass of $(doc).tex)
-	pdflatex.exe $(texFlags) $(doc).tex
+	pdflatex $(texFlags) $(doc).tex
 
 # Access help as default target or by several names. This target needs to be the first one
 # in this file.

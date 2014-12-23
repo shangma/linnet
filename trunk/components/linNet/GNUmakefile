@@ -73,7 +73,7 @@ targetRunDir := test
 targetRunArgs := -v INFO -f short -c -l -o $(ARG) -- $(CNL)
 
 # Specify a blank separated list of directories holding source files.
-srcDirList := code/environment/ code/tokenStream/ code/Logger/ code/memoryManager/ code/linNet/
+srcDirList := code/environment/ code/tokenStream/ code/logger/ code/memoryManager/ code/linNet/
 
 # Exclusion list: Edit the list of excluded files. A blank separated list of source files
 # (with extension but without path) is expected, which are excluded from the compilation of

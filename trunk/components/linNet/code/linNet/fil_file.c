@@ -34,8 +34,10 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <stdio.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <stdarg.h>
+#include <unistd.h>
 #include <assert.h>
 
 #include "types.h"
@@ -424,8 +426,15 @@ boolean fil_copyDir(const char * const targetDir, const char * const srcDir)
         boolean success = true;
 
         /* Create empty directory at target location. */
-        if(mkdir(targetPath) != 0)
+        if(mkdir( targetPath
+#ifdef __unix__
+	        , /* mode: full access to anybody */ S_IRWXO | S_IRWXG | S_IRWXU
+#endif
+                ) != 0
+	  )
+	{
             PRINTF("Can't create new directory %s\n", targetPath);
+        }
         else
         {
             PRINTF("Succesfully created directory %s\n", targetPath);

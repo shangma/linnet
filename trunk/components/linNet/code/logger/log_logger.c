@@ -43,6 +43,7 @@
  */
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
@@ -590,13 +591,24 @@ static unsigned int logInternal( log_logger_t * const hObj
             idxWhere += 3;
         }
 
+	/* Convert the CPU time to milli seconds. Normally, it is stated in micro 
+           seconds but under Windows MinGW it is returned in milli seconds (and
+           actually is the world time nut the CPU consumption). More units are not
+           supported as POSIX demands micro seconds as only unit. */
+	uintmax_t cpuTimeInMs = (uintmax_t)clock()
+#if CLOCKS_PER_SEC == 1000000
+	                        / 1000
+#elif CLOCKS_PER_SEC != 1000
+# error Unsupported unit for CPU time encountered. Extend source code
+#endif
+	                        ;
+
         assert((int)logLevel >= 0 && (int)logLevel <= (int)log_noLogLevels);
-        assert(CLOCKS_PER_SEC == 1000);
         const char *unitClock = hObj->lineFormat == log_fmtLong? " ms": "";
         snprintf( lineHeader + idxWhere
                 , sizeof(lineHeader) - idxWhere
-                , "%06li%s - %6s - "
-                , clock()
+                , "%06ju%s - %6s - "
+                , cpuTimeInMs
                 , unitClock
                 , logLevelStringAry_[logLevel]
                 );

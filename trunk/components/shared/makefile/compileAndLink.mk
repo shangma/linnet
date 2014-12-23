@@ -94,7 +94,7 @@ h help targets usage:
 ifeq ($(OS),Windows_NT)
 	$(info   - bin/win<32Or64>/<configuration>/obj/<cFileName>.o: Compile a single C(++) module)
 else
-	$(info   - bin/<configuration>/obj/<cFileName>.o: Compile a single C(++) module)
+	$(info   - $(call binFolder)<configuration>/obj/<cFileName>.o: Compile a single C(++) module)
 endif
 	$(info   - <cFileName>.i: Preprocess a single C(++) module)
 	$(info   - help: Print this help)
