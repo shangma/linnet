@@ -33,7 +33,7 @@
 #define LIN_APP_NAME    "linNet"
 
 /** The revision. */
-#define LIN_SW_REV      "1.0.0"
+#define LIN_SW_REV      "1.0.1"
 
 /** The name of the application's executable file. */
 #ifdef __WINNT__

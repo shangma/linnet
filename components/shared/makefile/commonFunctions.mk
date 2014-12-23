@@ -23,7 +23,7 @@ endef
 #   Determine the name of the root folder of all build products. The name should
 # distinguish between all supported target systems. Furthermore, under Windows it should if
 # possible distinguish between 32 or 64 Bit systems.
-binFolder = bin/$(if $(findstring Windows,$(OS)),$(if $(findstring 64,$(MINGW_HOME)),win64,win32)/,)
+binFolder = bin/$(if $(findstring Windows,$(OS)),$(if $(findstring 64,$(MINGW_HOME)),win64,win32)/,$(OS)/)
 # Example:
 # $(info Target folder for produced binaries is $(call binFolder))
 

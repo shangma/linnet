@@ -85,6 +85,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
@@ -174,7 +175,7 @@ typedef struct tok_tokenStream_t
     tok_hStream_t hStream;
 
     /** The application defined character input function if in use, or NULL otherwise. */
-    int (*getc)(tok_hCharInputStream_t);
+    int (*fgetc)(tok_hCharInputStream_t);
 
     /** The customer provided extension of the internal token table. The application my
         define particular character sequences and associate them with an integer number
@@ -411,7 +412,7 @@ static inline boolean iswhitespace(tok_hTokenStream_t hTStream, signed int c)
 static signed int readCharFromStream(tok_hTokenStream_t hTokenStream)
 {
     signed int c;
-    if(hTokenStream->getc == NULL)
+    if(hTokenStream->fgetc == NULL)
     {
         assert(hTokenStream->hStream.hFile != NULL);
         c = fgetc(hTokenStream->hStream.hFile);
@@ -434,7 +435,7 @@ static signed int readCharFromStream(tok_hTokenStream_t hTokenStream)
     else
     {
         assert(hTokenStream->hStream.hCustomStream != NULL);
-        c = hTokenStream->getc(hTokenStream->hStream.hCustomStream);
+        c = hTokenStream->fgetc(hTokenStream->hStream.hCustomStream);
     }
 
     return c;
@@ -1732,7 +1733,7 @@ boolean tok_createTokenStream( tok_hTokenStream_t * const phTokenStream
     pTokenStream->error = false;
     pTokenStream->errorMsg = stralloccpy("");
     pTokenStream->hStream = hStream;
-    pTokenStream->getc = customFctGetChar;
+    pTokenStream->fgetc = customFctGetChar;
 
     /* Make a deep copy of the client's symbol definitions into this new token stream
        object. */
@@ -1779,7 +1780,7 @@ void tok_deleteTokenStream(tok_hTokenStream_t hTokenStream)
     if(hTokenStream == TOK_HANDLE_TO_INVALID_TOKEN_STREAM)
         return;
 
-    if(hTokenStream->getc == NULL  &&  hTokenStream->hStream.hFile != NULL)
+    if(hTokenStream->fgetc == NULL  &&  hTokenStream->hStream.hFile != NULL)
         fclose(hTokenStream->hStream.hFile);
 
     assert(hTokenStream->hFifoChar != NULL

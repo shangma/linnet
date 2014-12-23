@@ -32,6 +32,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <errno.h>
 #include <dirent.h>
 #include <string.h>
 #include <ctype.h>
@@ -259,7 +261,11 @@ static boolean makeOctaveOutputDir( const char * const outputPath
     }
 
     /* Create the Octave folder at the aimed output path. */
-    boolean success = mkdir(octavePath) == 0;
+    boolean success = mkdir( octavePath
+#ifdef __unix__
+	                   , /* mode: full access to anybody */ S_IRWXO | S_IRWXG | S_IRWXU
+#endif
+                           ) == 0;
     if(!success)
     {
         LOG_ERROR( hLog
