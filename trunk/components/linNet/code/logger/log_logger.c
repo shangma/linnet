@@ -591,23 +591,34 @@ static unsigned int logInternal( log_logger_t * const hObj
             idxWhere += 3;
         }
 
-	/* Convert the CPU time to milli seconds. Normally, it is stated in micro 
+        /* Convert the CPU time to milli seconds. Normally, it is stated in micro 
            seconds but under Windows MinGW it is returned in milli seconds (and
-           actually is the world time nut the CPU consumption). More units are not
+           actually is the world time not the CPU consumption). More units are not
            supported as POSIX demands micro seconds as only unit. */
-	uintmax_t cpuTimeInMs = (uintmax_t)clock()
-#if CLOCKS_PER_SEC == 1000000
-	                        / 1000
-#elif CLOCKS_PER_SEC != 1000
-# error Unsupported unit for CPU time encountered. Extend source code
+        uintmax_t cpuTimeInMs = (uintmax_t)clock()
+#if defined(__WINNT__) && (defined(__MINGW32__) || defined(__MINGW64__))
+                                ;
+        assert(CLOCKS_PER_SEC == (clock_t)1000);
+# ifdef __MINGW32__
+#  if UINT64_MAX == UINTMAX_MAX
+#   define F_MAXU_T "I64u"
+#  else
+#   error Invalid usage of longest available integer type
+#  endif
+# else // defined(__MINGW64__)
+#  define F_MAXU_T "ju"
+# endif
+#else // LINUX and other POSIX compliant systems
+                                / 1000
+                                ;
+        assert(CLOCKS_PER_SEC == (clock_t)1000000);
+# define F_MAXU_T "ju"
 #endif
-	                        ;
-
         assert((int)logLevel >= 0 && (int)logLevel <= (int)log_noLogLevels);
         const char *unitClock = hObj->lineFormat == log_fmtLong? " ms": "";
         snprintf( lineHeader + idxWhere
                 , sizeof(lineHeader) - idxWhere
-                , "%06ju%s - %6s - "
+                , "%06" F_MAXU_T "%s - %6s - "
                 , cpuTimeInMs
                 , unitClock
                 , logLevelStringAry_[logLevel]
