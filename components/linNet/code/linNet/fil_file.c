@@ -428,11 +428,11 @@ boolean fil_copyDir(const char * const targetDir, const char * const srcDir)
         /* Create empty directory at target location. */
         if(mkdir( targetPath
 #ifdef __unix__
-	        , /* mode: full access to anybody */ S_IRWXO | S_IRWXG | S_IRWXU
+                , /* mode: full access to anybody */ S_IRWXO | S_IRWXG | S_IRWXU
 #endif
                 ) != 0
-	  )
-	{
+          )
+        {
             PRINTF("Can't create new directory %s\n", targetPath);
         }
         else
