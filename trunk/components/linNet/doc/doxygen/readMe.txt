@@ -2,7 +2,7 @@ doxygen is a freeware tool to generate professional documentation from
 information found in the various C source files and maybe other files. In
 order to run the generation process you need to install the tool first.
 See http://www.doxygen.org for details. The documentation found here has
-been compiled with doxygen 1.7.3.
+been compiled with doxygen 1.8.8.
 
 The doxyfile in this directory controls the run of the tool in order to
 produce the wanted output. It solely uses relative paths which found here.
