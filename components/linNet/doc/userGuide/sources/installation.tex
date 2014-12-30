@@ -32,22 +32,43 @@ If the environment variable is not set then \linnet{} makes an attempt to
 find its resources via the path to itself. However, it depends on the
 system, the shell in use and the way the command is typed, whether this
 information is completely passed to the application or not. If it can't
-find out where to find itself it'll refuse to generate Octave
-code.\footnote{There are system specific functions which let an
-application find out, where its executable file is located, e.g.
-\code{GetModuleFileName} for Windows, but the use of such functions would
-make \linnet{} system dependent. This price is much too high for an a bit
-simpler installation.} Not setting the environment variable can be a safe
-option if you decide to run \linnet{} solely from a shell window with an
-alias, which expands to the full, absolute path of the executable.
+find out where to find itself it'll refuse to generate Octave code as it
+lacks the folder \file{private} with code templates.\footnote{There are
+system specific functions which let an application find out, where its
+executable file is located, e.g. \code{GetModuleFileName} for Windows, but
+the use of such functions would make \linnet{} system dependent. This
+price is much too high for an a bit simpler installation.} Not setting the
+environment variable can be a safe option if you decide to run \linnet{}
+solely from a shell window with an alias, which expands to the full,
+absolute path of the executable.
 
 
-\section{Linux and Mac OS}
+\section{Mac OS}
 
-Unfortunately, Linux and Macintosh users will have to compile \linnet{}
-from the sources prior to use. At the moment no pre-built executables are
-available for these systems. Please refer to section
-\ref{secBuildingLinNet} on page \pageref{secBuildingLinNet}.
+Unfortunately, Macintosh users will have to compile \linnet{} from the
+sources prior to use. At the moment no pre-built executables are available
+for this system. Please refer to section \ref{secBuildingLinNet} on page
+\pageref{secBuildingLinNet}.
+
+
+\section{Linux}
+
+The download of \linnet{} contains pre-build executable files for Linux
+(in DEBUG and PRODUCTION compilation). The executable files are already
+bundled with the resources folder \file{private} so that the installation
+reduces to copying the build folder of choice to any location, preferably
+\file{/usr/bin}, renaming the folder itself to \file{\linnet{}}, running
+\code{chmod +x} to make the binary file executable and setting the
+environment variable \code{LINNET\_HOME}; it would be set to
+\file{/usr/\-bin/\-\linnet{}} if the suggested installation folder was
+used. The chosen installation path should not contain blanks.
+
+The Linux files have been built and run in a single environment only; this
+was a Fedora 18 distribution. It can't be guaranteed that the binaries are
+compatible with any other Linux derivate. Furthermore, no profound testing
+has been done under Linux, only the few test cases from the distribution
+have been run to prove that the expected program output is yielded. No
+testing with Octave has been done under Linux.
 
 
 \section{Windows}
@@ -59,10 +80,11 @@ A build for 32 and 64 Bit is contained, each as DEBUG or PRODUCTION
 compilation. The executable files are already bundled with the resources
 folder \file{private} so that the installation reduces to copying the
 build folder of choice to any location, preferably
-\file{c:\bs{}\-Program\-Files}, which doesn't contain blanks, and setting
-the environment variable \code{LINNET\_HOME}; it would be set to
-\file{c:\bs{}\-Program\-Files\bs{}\-\linnet{}} if the suggested
-installation folder was used.
+\file{c:\bs{}\-Program\-Files}, renaming the folder itself to
+\file{\linnet{}} and setting the environment variable \code{LINNET\_HOME};
+it would be set to \file{c:\bs{}\-Program\-Files\bs{}\-\linnet{}} if the
+suggested installation folder was used. The chosen installation path
+should not contain blanks.
 
 
 \subsection{Required DLLs}
@@ -108,6 +130,8 @@ log file after computation to find out if the computation was successful.
 Here's a template for a Windows registry script to make an appropriate
 file class definition:
 
+% TODO Double-check appropriateness of \clearpage command after any change of chapter Installation
+\clearpage
 {\footnotesize
 \begin{verbatim}
 REGEDIT4

@@ -81,11 +81,22 @@ attrib -R %output%\bin\LINUX\PRODUCTION\linNet
 mkdir %output%\circuits
 copy test\failingTestCases\bandStop.makesOctave3-4-3-win32Crash.cnl %output%\circuits
 copy test\testCases\octagon.cnl %output%\circuits
+copy test\testCases\octagon.jpg %output%\circuits
 copy test\testCases\inverseTF.cnl %output%\circuits
 copy test\testCases\largeAndSimple.cnl %output%\circuits
 copy test\testCases\deviceAtSingleNode.cnl %output%\circuits
 copy test\testCases\recursiveControlledVoltageSrcs.jpg %output%\circuits
 copy test\testCases\recursiveControlledVoltageSrcs.cnl %output%\circuits
+copy test\testCases\2poleLP.cnl %output%\circuits
+copy test\testCases\3poleLP.cnl %output%\circuits
+copy test\testCases\trickyOP.ckt %output%\circuits
+copy test\testCases\trickyOP.jpg %output%\circuits
+copy test\testCases\wire*.cnl %output%\circuits
+copy test\testCases\wire*.log %output%\circuits
+copy test\testCases\testCases.vsd %output%\circuits
+copy test\testCases\exampleManual.cnl %output%\circuits
+copy test\testCases\NgtD.cnl %output%\circuits
+copy test\testCases\rr.cnl %output%\circuits
 
 :: The source code
 copy doc\linnet.ico %output%\doc

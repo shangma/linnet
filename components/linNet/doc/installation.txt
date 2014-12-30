@@ -9,10 +9,29 @@ application resources. The DEBUG compilations are suggested.
 The path to the installation location should not contain any blanks.
 
 Add the variable LINNET_HOME to your system environment. The value of this
-variable is the name and path of the copied folder.
+variable is the name and path of the copied folder, i.e. the folder where
+the linNet executable is located in.
 
 Add the name and path of the copied folder to the system PATH variable.
 
-To test the installation 
+Under Linux, the executable file needs to be tagged as such. After copying
+the file, use chmod +x ... to make it executable. Please see the Linux man
+page for details.
+
+To test the installation open a shell window, cd to any folder and type
+linNet --version
+then type
+linNet -o -l <linNetComponentDir>/circuits/2poleLP.cnl
+Please note, that the path <linNetComponentDir> to the folder circuits
+with some sample netlist files differs depending on the archive you've
+downloaded. The archive with source files uses a more complex folder
+structure as appropriate for the build process. The place holder
+<linNetComponentDir> has to be replaced accordingly.
+
+Both commands must complete without any error message. Double check that
+the folder 2poleLP has been created in the current working directory and
+that it contains the other folder private in turn holding a number of
+about five Octave script files.
+
 For additional information please refer to the manual, file
 linNet/doc/userGuide/linNet-userGuide.pdf.

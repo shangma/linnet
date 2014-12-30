@@ -1,6 +1,6 @@
 /**
  * @file $(file-name: <buffer-name>)
- *   Test case for linNet.
+ *   Test case for linNet.\n
  * This test case proves, $(point)$(fill-prefix: " * ")
  *
  * Copyright (C) $(year: <year>) Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
