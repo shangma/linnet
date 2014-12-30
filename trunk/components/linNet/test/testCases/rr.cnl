@@ -1,0 +1,43 @@
+/**
+ * @file rr.cnl<2>
+ *   Test case for linNet.\n
+ * A simple voltage divider with different result definitions.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+R R in out
+R r2 out gnd r2=3*R 
+
+U Uin in gnd
+
+DEF Uout out gnd
+DEF CpyUin in gnd
+DEF Uloss in out
+
+PLOT rr_G U_out Uin
+PLOT rr_CpyG Uout CpyUin
+PLOT rr_Z Uin I_Uin
+PLOT rr_err Uin Uin
+PLOT rr_useless Uout Uout
+PLOT rr_identic CpyUin Uin
+PLOT rr_yy Uloss Uout
+
+/* Octave 3.8.2, control 2.6.6, has a problem to plot the time domain
+   solution (step response) with one input and two (constant) outputs. The
+   error message is barely understandable. MATLAB plots the simple
+   solution properly. */
+RES rr Uout I_Uin

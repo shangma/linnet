@@ -27,13 +27,9 @@ if not "%1" == "" goto LUsage
 setlocal
 
 pushd "%tmpCheckoutFolder%\components\linNet"
-echo Compiling the software in all configurations
+echo Compiling the software in all Windows configurations
 make -s CONFIG=DEBUG rebuild
 make -s CONFIG=PRODUCTION rebuild
 make -s MINGW_HOME=C:\ProgramFiles\mingw64 CONFIG=DEBUG rebuild     
 make -s MINGW_HOME=C:\ProgramFiles\mingw64 CONFIG=PRODUCTION rebuild
 popd
-
-
-
-

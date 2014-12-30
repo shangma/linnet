@@ -1,0 +1,33 @@
+/**
+ * @file NgtD.cnl
+ *   Test case for linNet.\n
+ * This test case proves, that linNet has no problems with a
+ * system, which has a nominator power in s that is greater than the
+ * denominator power (for the input current) due to
+ * directly connected C.\n
+ *   Octave has problems to plot the time domain result, which would
+ * contain a dirac function and emits a poor, barely understandable error
+ * message. MATLAB also rejects the plot but it responds with a clear and
+ * appropriate error message.
+ *
+ * Copyright (C) 2014 Peter Vranken (mailto:Peter_Vranken@Yahoo.de)
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+U   U1  in  gnd
+
+C   C1  in  gnd
+R   R1  out gnd
+R   R2  in  out

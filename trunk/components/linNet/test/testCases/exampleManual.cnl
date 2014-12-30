@@ -1,6 +1,6 @@
 U Uin in gnd
 R R1 in k1
-R R2 k1 k2,  R2=(7/8)*R1
-R R3 k2 gnd, R3=(5/7)*R2
+R R2 k1 k2  R2=(7/8)*R1
+R R3 k2 gnd R3=(5/7)*R2
 DEF Uout k2 gnd
 RES VDiv Uout

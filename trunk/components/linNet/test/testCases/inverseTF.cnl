@@ -24,11 +24,11 @@
 U   U1  in  gnd
 OP  OP1 op1 gnd op_q
 R   R   in  op1 
-R   RT1 op1 p1, RT1=R
+R   RT1 op1 p1 RT1=R
 C   CT1 op1 p1
-R   RT2 p1  p2, RT2 = R
+R   RT2 p1  p2 RT2 = R
 C   CT2 p1  p2
-R   RU  p2  op_q, RU = R
+R   RU  p2  op_q RU = R
 
 /* The normal transfer function as Bode plot. */
 PLOT    G       U_op_q  U1

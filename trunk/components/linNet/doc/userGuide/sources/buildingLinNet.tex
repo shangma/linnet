@@ -35,12 +35,13 @@ tackled by conditional code (see below).
 The makefile needs to know, where GCC is installed. For Windows systems
 the environment variable \ident{MINGW\_\-HOME} has been introduced. It may
 be used to specify the root folder of a MinGW installation. If it is set,
-either persistently or -- e.g. to be able to switch between 32 Bit and 64
-Bit builds -- on the command line of the make processor then the directory
-\file{\$\{MINGW\_\-HOME\}/bin} supersedes the normal system search path. If
-the variable is not set then all executables will be located via the
-system search path as specified in environment variable PATH. Please refer
-to file \file{locateTools.mk} for details.\footnote{Although designed for
+either persistently or on the command line of the make processor -- e.g.
+to be able to switch between 32 Bit and 64 Bit builds -- then the
+directory \file{\$\{MINGW\_\-HOME\}/bin} supersedes the normal system
+search path. If the variable is not set then all executables will be
+located via the system search path as specified in environment variable
+PATH. This would be the natural choice for a Linux system. Please refer to
+file \file{locateTools.mk} for details.\footnote{Although designed for
 Windows, where typically several different competing ports of GCC can
 reside, the environment variable can be used for Linux and Mac OS, too.
 Don't bother with the name but let the variable point to the parent folder
@@ -48,10 +49,11 @@ of GCC's bin folder.}
 
 The makefiles are designed to support the compilation under Linux and Mac
 OS also. GNU make's \code{if}/\code{else}/\code{endif} statements have
-been applied to do so. This has however never been tested and will
-probably not work out of the box. Particularly, you should have a look at
-the tool localization in \file{locateTools.mk} and the compiler and linker
-command line options in \file{compileAndLink.mk}.
+been applied to do so. As of today, this has been tested with a single Linux
+distribution only (Fedora 18) and might not work out of the box for other
+environments. Particularly, you should have a look at the tool
+localization in \file{locateTools.mk} and the compiler and linker command
+line options in \file{compileAndLink.mk}.
 
 
 \subsection{Resource compiler}
@@ -72,7 +74,10 @@ appropriate \code{else} paths; an OS indicating variable already exists.
 \section{Portability of source code}
 
 The source code itself is system independent; only the abstract functions
-from the GNU C library are used.
+from the GNU C library are used. The sources have been compiled and linked
+without errors and warnings with GCC 4.5.2 (32 Bit) and 4.8.1 (64 Bit),
+both Windows 7, and GCC 4.7.2 under Linux in the Fedora 18-i686
+distribution.
 
 The compilation with a different compiler tool chain (including another
 revision or port of GCC) will probably introduce some changes on the
@@ -82,10 +87,11 @@ source files. The applied compiler needs to support the standard C99.
 \subsection{GNU extensions}
 
 In module \ident{rat\_rationalNumber} a GNU extension is used: Initialized
-structs are used as r-values. This has been done for convenience only, to
-achieve at tense and meaningful representation of the required
-functionality. It should however be easy and straightforward to eliminate
-these (few) constructs. All the rest is according to the standard C99.
+structs are used as RHS of assignment expressions. This has been done
+for convenience only, to achieve at tense and meaningful representation of
+the required functionality. It should however be easy and straightforward
+to eliminate these (few) constructs. All the rest is according to the
+standard C99.
 
 
 \subsection{Incompatibilities of linked libraries}
