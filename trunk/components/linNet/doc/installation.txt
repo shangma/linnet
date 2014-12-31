@@ -6,6 +6,9 @@ binary to a location of your choice. The folder to copy is one out of
 those, which contain the linNet executable and the folder private with
 application resources. The DEBUG compilations are suggested.
 
+It is suggested to rename the copied folder itself from e.g. DEBUG to
+linNet.
+
 The path to the installation location should not contain any blanks.
 
 Add the variable LINNET_HOME to your system environment. The value of this
