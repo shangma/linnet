@@ -22,21 +22,22 @@ mkdir %tmpFolder%\linNet\components\linNet
 
 :: Go back to the root of the project.
 pushd ..\..\..\..
-set output=components\linNet\cm\createSetup\%tmpFolder%\linNet\components\linNet
 
 :: Global documentation. The version file needs to be supplied by the caller of this
 :: script.
+set output=components\linNet\cm\createSetup\%tmpFolder%\linNet
 copy gpl.txt %output%
+copy components\linNet\doc\readMe.forSetupWithSources.txt %output%\readMe.txt
 :: Goto the root of component linNet
 popd
 pushd ..\..
 set output=cm\createSetup\%tmpFolder%\linNet\components\linNet
 mkdir %output%\doc
+copy readMe.txt %output%
 copy cm\createSetup\version.txt %output%
 copy doc\installation.txt %output%\doc
 copy doc\parser-cnl-bnf.txt %output%\doc
 copy doc\parser-ckt-bnf.txt %output%\doc
-copy doc\readMe.forSetup.txt %output%\readMe.txt
 copy doc\linnet.jpg %output%\doc
 
 :: Doxygen documentation

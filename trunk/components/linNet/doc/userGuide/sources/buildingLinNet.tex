@@ -8,10 +8,11 @@ compilation\footnote{Windows 7 has been used.}. In all other environments
 a build of the sources needs to be done prior to the use of \linnet{}.
 
 To start the build you need to \code{cd} in a shell window to the root
-directory of the \linnet{} distribution, where the file \file{GNUmakefile}
-is located. Here, you issue the command:
+directory of component \code{linNet} in the source code distribution; this
+is folder \file{components/linNet}, where the file \file{GNUmakefile} is
+located. Here, you issue the command:
 \begin{verbatim}
-make build
+make -s build
 \end{verbatim}
 The makefile has some more useful targets and options than just
 \ident{build}. Tpye \code{make help} to find out.
@@ -22,21 +23,29 @@ The makefile has some more useful targets and options than just
 The makefile -- actually it is a set of nested makefiles -- is compatible
 with the GNU make processor of at least revision 3.81; 3.80 is not
 sufficient. Different derivates of make always tended to be quite
-incompatible to one another and other derivates of make will hence need
+incompatible to one another and other derivates of make will hence require
 heavy modifications of the makefiles.
 
-The makefiles directly support the build of the software for Windows with
+The makefile directly supports the build of the software for Windows with
 GCC in the MinGW 32 and 64 Bit ports. The compilation and the compiled
 software have been tested with GCC 4.5.2 (32 Bit) and 4.8.1 (64 Bit) and
 under Windows 7 only. Other revisions may cause problems: Even between
 these two severe incompatibilities have been found, which had to be
 tackled by conditional code (see below).
 
+The build process has been designed to support the compilation under Linux
+and Mac OS, too. GNU make's \code{if}/\code{else}/\code{endif} statements
+have been applied to do so. As of today, this has been tested with a
+single Linux distribution only (Fedora 18) and might not work out of the
+box for other environments. Particularly, you should have a look at the
+tool localization in \file{locateTools.mk} and the compiler and linker
+command line options in \file{compileAndLink.mk}.
+
 The makefile needs to know, where GCC is installed. For Windows systems
 the environment variable \ident{MINGW\_\-HOME} has been introduced. It may
 be used to specify the root folder of a MinGW installation. If it is set,
 either persistently or on the command line of the make processor -- e.g.
-to be able to switch between 32 Bit and 64 Bit builds -- then the
+to switch on the fly between 32 Bit and 64 Bit builds -- then the
 directory \file{\$\{MINGW\_\-HOME\}/bin} supersedes the normal system
 search path. If the variable is not set then all executables will be
 located via the system search path as specified in environment variable
@@ -46,14 +55,6 @@ Windows, where typically several different competing ports of GCC can
 reside, the environment variable can be used for Linux and Mac OS, too.
 Don't bother with the name but let the variable point to the parent folder
 of GCC's bin folder.}
-
-The makefiles are designed to support the compilation under Linux and Mac
-OS also. GNU make's \code{if}/\code{else}/\code{endif} statements have
-been applied to do so. As of today, this has been tested with a single Linux
-distribution only (Fedora 18) and might not work out of the box for other
-environments. Particularly, you should have a look at the tool
-localization in \file{locateTools.mk} and the compiler and linker command
-line options in \file{compileAndLink.mk}.
 
 
 \subsection{Resource compiler}

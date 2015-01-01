@@ -33,7 +33,7 @@ mkdir %output%\doc
 :: The version file needs to be supplied by the caller of this script.
 copy cm\createSetup\version.txt %output%
 copy doc\installation.txt %output%\doc
-copy doc\readMe.forSetup.txt %output%\readMe.txt
+copy doc\readMe.forSetupBinaries.txt %output%\readMe.txt
 
 :: User guide without sources
 mkdir %output%\doc\userGuide
