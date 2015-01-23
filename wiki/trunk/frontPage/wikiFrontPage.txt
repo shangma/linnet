@@ -89,9 +89,9 @@ You will find the details of the usage of linNet, in particular
 installation, netlist syntax and Octave interface and an explanation of
 the mathematical concept of the software in the user guide. Please use the
 external links on the upper left hand side of this window to download the
-user guide. The download of the ready-to-use, pre-compiled software (so far
-Windows only) with or without source files can be found there as further
-links.
+user guide. The download of the ready-to-use, pre-compiled software
+(only Windows and Linux) with or without source files can be found
+there as further links.
 
 linNet means "linear network". It founds on a symbolic solver for
 linear equation systems. There's no way to model any non linear effects

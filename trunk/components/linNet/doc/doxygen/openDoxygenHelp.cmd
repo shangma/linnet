@@ -1,1 +1,1 @@
-start "linNet Doxygen Help" explorer html\index.html
+start "linNet Doxygen Help" explorer doxygenHelp.html

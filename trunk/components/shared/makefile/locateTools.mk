@@ -8,8 +8,6 @@
 # Help on the syntax of this makefile is got at
 # http://www.gnu.org/software/make/manual/make.pdf.
 #
-# Author: Peter Vranken (mailto:Peter.Vranken@FEV.de)
-#
 
 # Only uncomment the next line when running this fragment independently for maintenace
 # purpose.
