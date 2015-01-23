@@ -13,7 +13,7 @@ doxygen
 
 To open the compiled doxygen help you may type
 
-html\index.html
+doxygenHelp.html
 
 or -- on a Windows system -- double-click on
 

@@ -6,8 +6,6 @@
 # Help on the syntax of this makefile is got at
 # http://www.gnu.org/software/make/manual/make.pdf.
 #
-# Author: Peter Vranken (mailto:Peter.Vranken@FEV.de)
-#
 
 
 # Return a end of line character. No parameters, can be called without $(call).
